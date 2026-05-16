@@ -2,6 +2,14 @@
 
 namespace Kart {
 
+bool KartState::overZipper() const {
+    return m_zipper;
+}
+
+void KartState::resetZipper() {
+    m_zipper = false;
+}
+
 bool KartState::inCannon() const {
     return m_inCannon;
 }

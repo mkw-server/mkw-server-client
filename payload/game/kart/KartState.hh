@@ -11,6 +11,10 @@ class KartState {
     friend class KartSub;
 
 public:
+    bool overZipper() const;
+
+    void resetZipper();
+
     bool inCannon() const;
 
     bool hopStart() const;
@@ -63,7 +67,10 @@ private:
     u32 : 2;
     bool m_beforeRespawn : 1;
     u32 : 4;
-    u32 : 23;
+    // 0x08
+    u32 : 21;
+    bool m_zipper : 1;
+    u32 : 1;
     bool m_blinking : 1;
     u32 : 3;
     bool m_inCannon : 1;
