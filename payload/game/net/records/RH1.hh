@@ -11,8 +11,12 @@ extern "C" {
 namespace Net {
 
 struct RH1Record {
-    u32 elapsedTimeSinceRaceStart;
-    u32 seed; // random seed set from RaceConfig::Settings, MiscPacketHandler's bitfield
+    // Starts when countdown begins. See RaceManager.m_countdownTimer
+    u32 timeSinceCountdown;
+
+    // Random seed. Non-zero for racers and zero for spectators and players in globe scene
+    // Its both used for rng and deciding who's racing
+    u32 raceSeed;
     Registry::Team p1Team : 16;
     Registry::Team p2Team : 16;
     u16 lagFrames;
@@ -20,7 +24,7 @@ struct RH1Record {
     Registry::Vehicle p2Vehicle : 8;
     Registry::Character p1Character : 8;
     Registry::Character p2Character : 8;
-    u16 countDownTime;
+    u16 introCameraTimeAdjLatency;
     u16 starRank;
     Registry::Course coursePlayed : 8;
     // sets bitfield when != 0, but not sure how it gets set.

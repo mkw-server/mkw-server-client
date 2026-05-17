@@ -42,8 +42,8 @@ public:
         return m_introTimer;
     }
 
-    u32 raceTimer() const {
-        return m_timer;
+    u32 countdownTimer() const {
+        return m_countdownTimer;
     }
 
     static RaceManager *Instance() {
@@ -63,7 +63,7 @@ private:
     u16 m_introTimer;
 
     // Begins counting when race countdown starts
-    u32 m_timer;
+    u32 m_countdownTimer;
     u8 _24[0x28 - 0x24];
     RaceState m_state;
     bool m_introWasSkipped;

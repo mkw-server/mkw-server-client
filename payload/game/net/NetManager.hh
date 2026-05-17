@@ -188,7 +188,14 @@ private:
     u32 m_disconnectedAids;                      // disconnected if 1 << aid is 1 // 0x292c
     u32 m_disconnectedPlayerIds;                 // disconnected if 1 << pid is 1 // 0x2930
     u8 _2934[0x295c - 0x2934];                   // elo based MM struct
-    u8 _295c[0x29c8 - 0x295c];                   // some timers
+    u8 _295c[0x2960 - 0x295c];                   // padding probably
+
+    // Calculated by SelectHandler's m_sumLatecies[aid] / m_latencySampleCount[aid]
+    OSTime m_averageLatencies[12];
+
+    // Max time since countdown of all players. Unclear what is does
+    u32 m_maxCountdownTime;
+    u8 _29c4[0x29c8 - 0x29c4]; // also probably padding
 
     MKWServer::OutgoingRacePackets
             m_outgoingUniquePackets; // added. TODO: Replace m_outgoingRacePacket

@@ -54,8 +54,12 @@ private:
     u8 _2e1[0x2e8 - 0x2e1];
     OSTime m_lastSendTime;
     OSTime m_lastReceivedTimes[12];
-    OSTime _350[12];
-    u32 _3b0[12];
+
+    // Latency is calculated upon importing a record. This is the sum of those latencies.
+    OSTime m_sumLatencies[12];
+
+    // Number of times latency has been calculated.
+    u32 m_latencySampleCount[12];
     u32 m_hasNewSelect; // bitfield
     u32 m_hasNewRH1;    // bitfield
     u32 _3e8;

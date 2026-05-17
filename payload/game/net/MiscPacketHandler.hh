@@ -80,7 +80,9 @@ private:
     u8 _18c[0x190 - 0x18c];
     // last time we updated our friends statuses. updated about once every 10 seconds
     OSTime m_elapsedTimeSinceFriendStatusUpdated;
-    u32 m_aidsTimeSinceRaceStart[MAX_PLAYER_COUNT];
+
+    // Set to the countdown time, but only after the countdown ends
+    u32 m_aidsTimeSinceCountdown[MAX_PLAYER_COUNT];
 
     static MiscPacketHandler *s_instance;
 };
