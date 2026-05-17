@@ -9,6 +9,7 @@ extern "C" {
 #include <game/util/Registry.hh>
 
 namespace Net {
+
 enum class OnlineMode {
     PublicVS = 1,
     PublicBattle = 2,
@@ -36,17 +37,19 @@ struct SelectRecord {
     Registry::Course winningCourse : 8; // not sure if this should be Vote
     u8 _35;
     u8 winningVoterAid;
-    u8 engineClass;
+    Registry::EngineClass engineClass : 8;
 };
 static_assert(sizeof(SelectRecord) == 0x38);
 class SelectHandler {
 private:
     void update();
 
+    REPLACE void decideEngineClass();
+
     OnlineMode mode;
     u8 _004[0x008 - 0x004];
-    SelectRecord m_sendPacket;
-    SelectRecord m_recvPackets[12];
+    SelectRecord m_sendRecord;
+    SelectRecord m_recvRecords[12];
     u8 m_lastSentToAid; // bitfield
     u8 _2e1[0x2e8 - 0x2e1];
     OSTime m_lastSendTime;
