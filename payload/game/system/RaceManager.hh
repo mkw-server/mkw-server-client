@@ -15,9 +15,12 @@ public:
         Finished = 3,
         FinishedTimeAttack = 4,
     };
+
     class Player {
     public:
-        PadProxy *padProxy();
+        const PadProxy *padProxy() const {
+            return m_padProxy;
+        }
 
     private:
         REPLACE void calc();
@@ -31,16 +34,37 @@ public:
     };
     static_assert(sizeof(Player) == 0x54);
 
-    Player *player(u32 playerId);
+    const Player *player(u32 playerId) const {
+        return m_players[playerId];
+    }
 
-    static RaceManager *Instance();
+    u16 introTimer() const {
+        return m_introTimer;
+    }
+
+    u32 raceTimer() const {
+        return m_timer;
+    }
+
+    static RaceManager *Instance() {
+        return s_instance;
+    }
 
 private:
     void calc();
 
     u8 _00[0x0c - 0x00];
     Player **m_players;
-    u8 _10[0x28 - 0x10];
+    u8 _10[0x1c - 0x10];
+    u8 m_finishedPlayerCount;
+    u8 m_disconnectedPlayerCount;
+
+    // Begins counting down when loaded into race, stops when countdown begins
+    u16 m_introTimer;
+
+    // Begins counting when race countdown starts
+    u32 m_timer;
+    u8 _24[0x28 - 0x24];
     RaceState m_state;
     bool m_introWasSkipped;
     bool m_spectatorMode;
@@ -49,7 +73,6 @@ private:
     bool m_lapCountingIsEnabled;
     u8 _31[0x4c - 0x31];
 
-public:
     static RaceManager *s_instance;
 };
 static_assert(sizeof(RaceManager) == 0x4c);

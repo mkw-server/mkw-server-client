@@ -12,10 +12,6 @@ extern "C" {
 
 namespace System {
 
-PadProxy *RaceManager::Player::padProxy() {
-    return m_padProxy;
-}
-
 void RaceManager::Player::calc() {
     REPLACED(calc)();
 
@@ -25,7 +21,7 @@ void RaceManager::Player::calc() {
     // These settings are exclusive to TTs. We check for playerId to prevent unintended behavior
     // from ghosts.
     if (gameMode == System::RaceConfig::GameMode::TimeAttack && m_playerId == 0) {
-        auto *playerPadProxy = System::RaceManager::Instance()->player(0)->padProxy();
+        auto *playerPadProxy = m_padProxy;
         auto buttons = playerPadProxy->currentRaceInputState().rawButtons;
         auto controller = playerPadProxy->pad()->getControllerId();
 
@@ -61,14 +57,6 @@ void RaceManager::Player::calc() {
             saveStateManager->processInput(isLoadButtonPressed);
         }
     }
-}
-
-RaceManager::Player *RaceManager::player(u32 playerId) {
-    return m_players[playerId];
-}
-
-RaceManager *RaceManager::Instance() {
-    return s_instance;
 }
 
 } // namespace System
