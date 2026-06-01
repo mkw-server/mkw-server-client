@@ -9,6 +9,8 @@ extern "C" {
 #include <sp/net/mkw_server/RoomManager.hh>
 #include <sp/net/mkw_server/packets/MatchMakingInfo.hh>
 
+#include <game/system/RaceManager.hh>
+
 #include <string.h>
 
 namespace MKWServer {
@@ -53,6 +55,20 @@ bool hasMKWServerAddress() {
     return s_mkwServerAddr.addr.addr != 0 && s_mkwServerAddr.port != 0;
 }
 
+void sendReadyPacket() {
+    if (!hasMKWServerAddress()) {
+        SP_LOG("sendReady() can't send: Don't have mkw-server address!");
+        return;
+    }
+
+    u8 msg[2] = {0x52, 0x45}; // RE
+
+    bool result = SOSendTo(s_dwcMatch->qrec->hbsock, &msg, sizeof(msg), 0, &s_mkwServerAddr);
+    if (!result) {
+        SP_LOG("Failed to send Race packet to mkw-server! SOSendTo failed!");
+    }
+}
+
 bool trySendRacePacketToMKWServer(const void *data, u32 size) {
     if (!hasMKWServerAddress()) {
         return false;
@@ -60,7 +76,7 @@ bool trySendRacePacketToMKWServer(const void *data, u32 size) {
 
     bool result = SOSendTo(s_dwcMatch->qrec->hbsock, data, size, 0, &s_mkwServerAddr);
     if (!result) {
-        SP_LOG("Failed to send to MKW Server!");
+        SP_LOG("Failed to send Race packet to mkw-server!");
     }
     return result;
 }
@@ -92,6 +108,10 @@ bool handleSearchIdPacket(const u8 *packet, u32 size) {
     }
 
     return true;
+}
+
+void startCountdown() {
+    System::RaceManager::Instance()->startCountdown();
 }
 
 bool sendMessageToQR2(const u8 *data, u32 size) {

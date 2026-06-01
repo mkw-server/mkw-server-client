@@ -46,6 +46,10 @@ public:
         return m_countdownTimer;
     }
 
+    void startCountdown() {
+        m_canCountdownStart = true;
+    }
+
     static RaceManager *Instance() {
         return s_instance;
     }

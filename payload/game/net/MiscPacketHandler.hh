@@ -3,10 +3,7 @@
 #include <Common.hh>
 
 #include "game/net/records/Event.hh"
-#include "game/net/records/RH1.hh"
-#include "game/net/records/RH2.hh"
 #include "game/net/records/RaceData.hh"
-#include "game/net/records/Select.hh"
 
 extern "C" {
 #include <revolution/os.h>
@@ -16,7 +13,21 @@ namespace Net {
 
 // MiscPacketHandler runs exclusively in race scene. It handles everything netcode during a race.
 class MiscPacketHandler {
+public:
+    // Added. sets m_readyAcked
+    void setAckReady();
+
+    static MiscPacketHandler *Instance() {
+        return s_instance;
+    }
+
 private:
+    // 0x806532d8
+    // Called exactly once at the start of a race to initialize members.
+    // Hooked to initialize mkw-server members.
+    REPLACE void init();
+    void REPLACED(init)();
+
     // 0x80653728
     // The main loop. Runs when m_isPrepared is true. This runs in online races
     // but also rival ghost races to update friend status
@@ -25,7 +36,9 @@ private:
     // 0x80654150
     // Runs only when racing. Synchronizes race start, imports, exports, and processes records
     // specifically as a racer.
-    void updateAsRacer();
+    // Hooked to handle mkw-server client synchronization.
+    REPLACE void updateAsRacer();
+    void REPLACED(updateAsRacer)();
 
     // 0x80654d08
     // Exports relevant records as a racer (as opposed to a spectator)
@@ -55,8 +68,14 @@ private:
     // Schecules a disconnect. Set if we're out of sync with other players.
     bool m_scheduleDisconnect;
 
-    // Padding
-    u8 _002[0x004 - 0x002];
+    // Added, was padding. Time (in frames) until we're ready to start the countdown.
+    // This is initialized to 120 frames (2 seconds) at the start of each race to account
+    // for the intro camera pan, and decremented each frame. When the timer is 0, send
+    // a ready packet to mkw-server.
+    s8 m_timeUntilReady;
+
+    // Added, was padding. Set when mkw-server has acked our ready packet.
+    bool m_readyAcked;
 
     // Bitfield set by RH1.raceSeed
     u32 m_aidsLoadedIntoRace;
@@ -94,3 +113,10 @@ private:
 static_assert(sizeof(MiscPacketHandler) == 0x1c8);
 
 } // namespace Net
+
+extern "C" void MiscPacketHandler_setAckReady() {
+    // Need to check for nullptr in case if an ack is unexpectedly sent outside of race scene.
+    if (auto *miscPacketHandler = Net::MiscPacketHandler::Instance()) {
+        miscPacketHandler->setAckReady();
+    }
+}
