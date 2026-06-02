@@ -7,7 +7,7 @@
 #include <string.h>
 
 #define START_MESSAGE "ST"
-
+#define PING_MESSAGE "PI"
 #define READY_ACK_MESSAGE "RA"
 
 bool isReadyAckPacket(const u8 *message, s32 len) {
@@ -17,6 +17,10 @@ bool isReadyAckPacket(const u8 *message, s32 len) {
 
 bool isStartPacket(const u8 *message, s32 len) {
     return len == 2 && strncmp((const char *)message, START_MESSAGE, strlen(START_MESSAGE)) == 0;
+}
+
+bool isPingPacket(const u8 *message, s32 len) {
+    return len == 2 && strncmp((const char *)message, PING_MESSAGE, strlen(PING_MESSAGE)) == 0;
 }
 
 BOOL DWCi_GT2UnrecognizedMessageCallback(GT2Socket socket, u32 ip, u16 port, const u8 *message,
@@ -40,6 +44,11 @@ BOOL DWCi_GT2UnrecognizedMessageCallback(GT2Socket socket, u32 ip, u16 port, con
     if (isStartPacket(message, len)) {
         SP_LOG("Received Start packet from mkw-server!");
         startCountdown();
+        return GT2True;
+    }
+
+    if (isPingPacket(message, len)) {
+        sendPong();
         return GT2True;
     }
 

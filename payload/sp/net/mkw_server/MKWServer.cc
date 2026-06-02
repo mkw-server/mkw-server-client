@@ -114,6 +114,20 @@ void startCountdown() {
     System::RaceManager::Instance()->startCountdown();
 }
 
+void sendPong() {
+    if (!hasMKWServerAddress()) {
+        SP_LOG("sendPong() can't send: Don't have mkw-server address!");
+        return;
+    }
+
+    u8 msg[2] = {0x50, 0x4F}; // PO
+
+    bool result = SOSendTo(s_dwcMatch->qrec->hbsock, &msg, sizeof(msg), 0, &s_mkwServerAddr);
+    if (!result) {
+        SP_LOG("Failed to send Pong packet to mkw-server! SOSendTo failed!");
+    }
+}
+
 bool sendMessageToQR2(const u8 *data, u32 size) {
     SOSockAddrIn qr2Addr;
     qr2Addr.len = sizeof(SOSockAddrIn);
