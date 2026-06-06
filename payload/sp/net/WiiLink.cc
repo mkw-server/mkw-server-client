@@ -153,8 +153,8 @@ EXTERN_C NHTTPRequestHandle createWFCAuthRequest() {
     }
 
     char uri[0x100];
-    // TODO: theres a better way to write this, gameId is gsbrcd, maybe 0x80000000 can be used
-    sprintf(uri, "payload?g=RMC%cD00&s=%s", DISK_REGION, saltHex);
+    // wfc-server expects the gameid + region, salt, mkw-server-client version, and the uri hash
+    sprintf(uri, "payload?g=RMC%cD00&s=%s&v=%s", DISK_REGION, saltHex, "CHANGEME!");
 
     // Generate salt hash
     SHA256Context ctx;
