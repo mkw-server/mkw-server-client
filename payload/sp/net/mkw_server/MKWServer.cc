@@ -9,8 +9,6 @@ extern "C" {
 #include <sp/net/mkw_server/RoomManager.hh>
 #include <sp/net/mkw_server/packets/MatchMakingInfo.hh>
 
-#include <game/system/RaceManager.hh>
-
 #include <string.h>
 
 namespace MKWServer {
@@ -108,10 +106,6 @@ bool handleSearchIdPacket(const u8 *packet, u32 size) {
     }
 
     return true;
-}
-
-void startCountdown() {
-    System::RaceManager::Instance()->startCountdown();
 }
 
 void sendPong() {

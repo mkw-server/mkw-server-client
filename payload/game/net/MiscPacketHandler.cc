@@ -34,3 +34,10 @@ void MiscPacketHandler::updateAsRacer() {
 }
 
 } // namespace Net
+
+void MiscPacketHandler_setAckReady() {
+    // Need to check for nullptr in case if an ack is unexpectedly sent outside of race scene.
+    if (auto *miscPacketHandler = Net::MiscPacketHandler::Instance()) {
+        miscPacketHandler->setAckReady();
+    }
+}

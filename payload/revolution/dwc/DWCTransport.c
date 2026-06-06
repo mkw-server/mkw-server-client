@@ -1,8 +1,9 @@
 #include "DWCTransport.h"
 
-#include <sp/net/mkw_server/MKWServer.h>
-
 #include <game/net/MiscPacketHandler.h>
+#include <game/system/RaceManager.h>
+
+#include <sp/net/mkw_server/MKWServer.h>
 
 #include <string.h>
 
@@ -43,7 +44,7 @@ BOOL DWCi_GT2UnrecognizedMessageCallback(GT2Socket socket, u32 ip, u16 port, con
 
     if (isStartPacket(message, len)) {
         SP_LOG("Received Start packet from mkw-server!");
-        startCountdown();
+        RaceManager_startCountdown();
         return GT2True;
     }
 

@@ -60,3 +60,9 @@ void RaceManager::Player::calc() {
 }
 
 } // namespace System
+
+void RaceManager_startCountdown() {
+    if (auto *raceManager = System::RaceManager::Instance()) {
+        raceManager->startCountdown();
+    }
+}

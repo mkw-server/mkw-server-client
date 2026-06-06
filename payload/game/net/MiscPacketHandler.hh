@@ -118,9 +118,6 @@ static_assert(sizeof(MiscPacketHandler) == 0x1c8);
 
 } // namespace Net
 
-extern "C" void MiscPacketHandler_setAckReady() {
-    // Need to check for nullptr in case if an ack is unexpectedly sent outside of race scene.
-    if (auto *miscPacketHandler = Net::MiscPacketHandler::Instance()) {
-        miscPacketHandler->setAckReady();
-    }
-}
+// Exposed to C b/c UDP packets are handled in a C function (DWCi_GT2UnrecognizedMessageCallback).
+// TODO: Rewrite in C++.
+extern "C" void MiscPacketHandler_setAckReady();

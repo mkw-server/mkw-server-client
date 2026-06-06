@@ -27,8 +27,6 @@ EXTERN_C bool verifySearchIdMagic(const u8 *packet, u32 size);
 
 EXTERN_C bool handleSearchIdPacket(const u8 *packet, u32 size);
 
-EXTERN_C void startCountdown();
-
 EXTERN_C void sendPong();
 
 bool sendMessageToQR2(const u8 *data, u32 size);
