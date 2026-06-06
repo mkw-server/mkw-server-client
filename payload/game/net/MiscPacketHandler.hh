@@ -33,6 +33,10 @@ private:
     // but also rival ghost races to update friend status
     void update();
 
+    // Added.
+    // Updates m_timeUntilReady. Calls MKWServer::sendReadyPacket() when m_timeUntilReady is 0.
+    void updateReadyTimer();
+
     // 0x80654150
     // Runs only when racing. Synchronizes race start, imports, exports, and processes records
     // specifically as a racer.
@@ -69,10 +73,10 @@ private:
     bool m_scheduleDisconnect;
 
     // Added, was padding. Time (in frames) until we're ready to start the countdown.
-    // This is initialized to 120 frames (2 seconds) at the start of each race to account
+    // This is initialized to 240 frames (4 seconds) at the start of each race to account
     // for the intro camera pan, and decremented each frame. When the timer is 0, send
     // a ready packet to mkw-server.
-    s8 m_timeUntilReady;
+    u8 m_timeUntilReady;
 
     // Added, was padding. Set when mkw-server has acked our ready packet.
     bool m_readyAcked;
