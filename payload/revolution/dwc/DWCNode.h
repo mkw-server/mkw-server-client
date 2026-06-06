@@ -1,9 +1,5 @@
-/*
- * Credits:
- * - CLF78: Midnight-Variety-Pack, licensed under the MPL license. See license in
- * licenses/Midnight-Variety-Pack.
- *
- */
+// Credits: CLF78: Midnight-Variety-Pack, licensed under the Mozilla Public License 2.0.
+// See license in LICENSE-Midnight-Variety-Pack.
 
 #pragma once
 
