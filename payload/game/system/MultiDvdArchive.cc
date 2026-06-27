@@ -74,7 +74,6 @@ MultiDvdArchive *MultiDvdArchive::Create(ResourceType type) {
     // the sp title and other assets occasionally load and I have no idea why. but it crashes the
     // game with the current implementation. for now, just return after calling the original
     // function so nothing loads
-    return REPLACED(Create)(type);
 
     switch (type) {
     case ResourceType::Race:
@@ -83,7 +82,8 @@ MultiDvdArchive *MultiDvdArchive::Create(ResourceType type) {
         return new CourseMultiDvdArchive;
     case ResourceType::Menu:
         return new MenuMultiDvdArchive;
-    // maybe font will be added back later on
+    case ResourceType::Font:
+        return new FontMultiDvdArchive;
     default:
         MultiDvdArchive *archive = new MultiDvdArchive(2);
         archive->init();
@@ -137,6 +137,27 @@ void MenuMultiDvdArchive::init() {
 
     for (size_t i = 0; i < 6; i++) {
         m_formats[i] = Format::Double;
+    }
+}
+
+FontMultiDvdArchive::FontMultiDvdArchive() : MultiDvdArchive(3) {
+    init();
+}
+
+FontMultiDvdArchive::~FontMultiDvdArchive() = default;
+
+void FontMultiDvdArchive::init() {
+    if (REGION == REGION_K) {
+        snprintf(m_names[0], 0x80, "/Scene/UI/Font_K.szs");
+        snprintf(m_names[1], 0x80, "/Scene/UI/FontSP_R.szs");
+    } else {
+        snprintf(m_names[0], 0x80, "/Scene/UI/Font.szs");
+        snprintf(m_names[1], 0x80, "/Scene/UI/FontSP_K.szs");
+    }
+    snprintf(m_names[2], 0x80, "/Scene/UI/Font_Dif.szs");
+
+    for (size_t i = 0; i < 3; i++) {
+        m_formats[i] = Format::Single;
     }
 }
 

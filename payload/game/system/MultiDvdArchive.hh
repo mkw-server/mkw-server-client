@@ -69,4 +69,11 @@ public:
     void init() override;
 };
 
+class FontMultiDvdArchive : public MultiDvdArchive {
+public:
+    FontMultiDvdArchive();
+    ~FontMultiDvdArchive() override;
+    void init() override;
+};
+
 } // namespace System
