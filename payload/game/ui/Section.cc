@@ -2,6 +2,9 @@
 
 #include "Section.hh"
 
+#include "game/ui/page/SettingsPage.hh"
+#include "game/ui/page/WifiMenuTopPage.hh"
+
 namespace UI {
 
 Page *Section::page(PageId pageId) {
@@ -50,7 +53,12 @@ void Section::addActivePage(PageId pageId) {
 void Section::addPages(SectionId id) {
     REPLACED(addPages)(id);
 
-    std::pair<SectionId, PageId> additions[] = {};
+    std::pair<SectionId, PageId> additions[] = {
+            // clang-format off
+            {SectionId::WifiSingle, PageId::MenuSettings},
+            {SectionId::WifiMulti, PageId::MenuSettings},
+            // clang-format on
+    };
     for (const auto &addition : additions) {
         if (addition.first == id) {
             addPage(addition.second);
@@ -73,7 +81,10 @@ void Section::addActivePages(SectionId id) {
 
 Page *Section::createPage(PageId pageId) {
     switch (pageId) {
-        // Add a new case for each new page.
+    case PageId::WifiMenuTop:
+        return new WifiMenuTopPage;
+    case PageId::MenuSettings:
+        return new MenuSettingsPage;
     default:
         return REPLACED(createPage)(pageId);
     }

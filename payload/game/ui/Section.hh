@@ -13,6 +13,9 @@
 
 namespace UI {
 
+class MenuSettingsPage;
+class WifiMenuTopPage;
+
 class Section {
 private:
     template <PageId P>
@@ -87,5 +90,15 @@ private:
 };
 static_assert(sizeof(Section) ==
         ROUND_UP(0x408 + std::max(1uz, sizeof(Page *) * ExtendedPageCount()), alignof(Section)));
+
+template <>
+struct Section::PageIdHelper<PageId::WifiMenuTop> {
+    using type = WifiMenuTopPage;
+};
+
+template <>
+struct Section::PageIdHelper<PageId::MenuSettings> {
+    using type = MenuSettingsPage;
+};
 
 } // namespace UI

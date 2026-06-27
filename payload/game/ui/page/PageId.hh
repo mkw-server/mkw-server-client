@@ -8,9 +8,18 @@ enum class PageId {
     None = -0x1,
     Empty = 0x0,
 
+    WifiShutdown = 0x87,
+    WifiMenuTop = 0x8B,
+    WifiMenuModeSelect = 0x8C,
+    WifiFriendMenu = 0x8D,
+    WifiRandomMatching = 0x8F,
+
     Max = 0xD3,
 
     ExtensionsBegin = 0xff,
+
+    MenuSettings,
+
     ExtensionsEnd,
 };
 static_assert(

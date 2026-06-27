@@ -117,7 +117,88 @@ HUD_LANGUAGES = {
 
 asset_in_files = {
     os.path.join('Scene', 'UI', 'CrashSP.arc.lzma'): sorted(glob.glob("fatal/**/*.*", root_dir="assets", recursive=True)),
+    os.path.join('Scene', 'UI', 'GlobeSP.arc.lzma'): [
+        # Settings
+        os.path.join('button', 'ctrl', 'SettingsButton.brctr.json5'),
+        os.path.join('bg', 'blyt', 'race_obi_bottom_message.brlyt.json5'),
+        os.path.join('bg', 'ctrl', 'ObiInstructionTextPopup.brctr.json5'),
+        os.path.join('control', 'anim', 'common_w023_rule_menu_text_light_02_select.brlan.json5'),
+        os.path.join('control', 'anim', 'common_w023_rule_menu_text_light_02_stop.brlan.json5'),
+        os.path.join('control', 'anim', 'common_w134_rule_rap_yaji_l_chara_light_01_ok.brlan.json5'),
+        os.path.join('control', 'anim', 'common_w134_rule_rap_yaji_l_chara_light_01_stop.brlan.json5'),
+        os.path.join('control', 'anim', 'common_w134_rule_rap_yaji_l_chara_light_02_select.brlan.json5'),
+        os.path.join('control', 'anim', 'common_w134_rule_rap_yaji_l_chara_light_02_stop.brlan.json5'),
+        os.path.join('control', 'anim', 'common_w134_rule_rap_yaji_l_free.brlan.json5'),
+        os.path.join('control', 'anim', 'common_w134_rule_rap_yaji_l_free_to_select.brlan.json5'),
+        os.path.join('control', 'anim', 'common_w134_rule_rap_yaji_l_fuchi_check_loop.brlan.json5'),
+        os.path.join('control', 'anim', 'common_w134_rule_rap_yaji_l_select.brlan.json5'),
+        os.path.join('control', 'anim', 'common_w134_rule_rap_yaji_l_select_to_free.brlan.json5'),
+        os.path.join('control', 'anim', 'common_w135_rule_rap_yaji_r_chara_light_01_ok.brlan.json5'),
+        os.path.join('control', 'anim', 'common_w135_rule_rap_yaji_r_chara_light_01_stop.brlan.json5'),
+        os.path.join('control', 'anim', 'common_w135_rule_rap_yaji_r_chara_light_02_select.brlan.json5'),
+        os.path.join('control', 'anim', 'common_w135_rule_rap_yaji_r_chara_light_02_stop.brlan.json5'),
+        os.path.join('control', 'anim', 'common_w135_rule_rap_yaji_r_free.brlan.json5'),
+        os.path.join('control', 'anim', 'common_w135_rule_rap_yaji_r_free_to_select.brlan.json5'),
+        os.path.join('control', 'anim', 'common_w135_rule_rap_yaji_r_fuchi_check_loop.brlan.json5'),
+        os.path.join('control', 'anim', 'common_w135_rule_rap_yaji_r_select.brlan.json5'),
+        os.path.join('control', 'anim', 'common_w135_rule_rap_yaji_r_select_to_free.brlan.json5'),
+        os.path.join('control', 'anim', 'common_w201_setting_menu_free.brlan.json5'),
+        os.path.join('control', 'anim', 'common_w201_setting_menu_free_to_select.brlan.json5'),
+        os.path.join('control', 'anim', 'common_w201_setting_menu_select.brlan.json5'),
+        os.path.join('control', 'anim', 'common_w201_setting_menu_select_to_free.brlan.json5'),
+        os.path.join('control', 'anim', 'gr_area_select_menu_dummy0_loop.brlan.json5'),
+        os.path.join('control', 'anim', 'gr_area_select_menu_dummy0_onetime.brlan.json5'),
+        os.path.join('control', 'anim', 'gr_area_select_menu_dummy1_loop.brlan.json5'),
+        os.path.join('control', 'anim', 'gr_area_select_menu_dummy1_onetime.brlan.json5'),
+        os.path.join('control', 'blyt', 'common_w134_rule_rap_yaji_l.brlyt.json5'),
+        os.path.join('control', 'blyt', 'common_w135_rule_rap_yaji_r.brlyt.json5'),
+        os.path.join('control', 'blyt', 'common_w201_setting_menu.brlyt.json5'),
+        os.path.join('control', 'blyt', 'gr_area_select_menu.brlyt.json5'),
+        os.path.join('control', 'ctrl', 'CategoryUpDownBase.brctr.json5'),
+        os.path.join('control', 'ctrl', 'CategoryUpDownButtonL.brctr.json5'),
+        os.path.join('control', 'ctrl', 'CategoryUpDownButtonR.brctr.json5'),
+        os.path.join('control', 'ctrl', 'SettingUpDownBase.brctr.json5'),
+        os.path.join('control', 'ctrl', 'SettingUpDownButtonL.brctr.json5'),
+        os.path.join('control', 'ctrl', 'SettingUpDownButtonR.brctr.json5'),
+        os.path.join('ranking', 'anim', 'area_select_window_free.brlan.json5'),
+        os.path.join('ranking', 'anim', 'area_select_window_free_to_select.brlan.json5'),
+        os.path.join('ranking', 'anim', 'area_select_window_fuchi_check_loop.brlan.json5'),
+        os.path.join('ranking', 'anim', 'area_select_window_select.brlan.json5'),
+        os.path.join('ranking', 'anim', 'area_select_window_select_to_free.brlan.json5'),
+        os.path.join('ranking', 'anim', 'area_select_window_text_text_center_to_right.brlan.json5'),
+        os.path.join('ranking', 'anim', 'area_select_window_text_text_hide.brlan.json5'),
+        os.path.join('ranking', 'anim', 'area_select_window_text_text_left_to_center.brlan.json5'),
+        os.path.join('ranking', 'anim', 'area_select_window_text_text_light_01_ok.brlan.json5'),
+        os.path.join('ranking', 'anim', 'area_select_window_text_text_light_01_stop.brlan.json5'),
+        os.path.join('ranking', 'anim', 'area_select_window_text_text_light_02_select.brlan.json5'),
+        os.path.join('ranking', 'anim', 'area_select_window_text_text_light_02_stop.brlan.json5'),
+        os.path.join('ranking', 'anim', 'area_select_window_text_text_stop.brlan.json5'),
+        os.path.join('ranking', 'anim', 'category_window_text_free.brlan.json5'),
+        os.path.join('ranking', 'anim', 'category_window_text_free_to_select.brlan.json5'),
+        os.path.join('ranking', 'anim', 'category_window_text_select.brlan.json5'),
+        os.path.join('ranking', 'anim', 'category_window_text_select_to_free.brlan.json5'),
+        os.path.join('ranking', 'anim', 'category_window_text_text_center_to_right.brlan.json5'),
+        os.path.join('ranking', 'anim', 'category_window_text_text_hide.brlan.json5'),
+        os.path.join('ranking', 'anim', 'category_window_text_text_left_to_center.brlan.json5'),
+        os.path.join('ranking', 'blyt', 'area_select_window.brlyt.json5'),
+        os.path.join('ranking', 'blyt', 'area_select_window_text.brlyt.json5'),
+        os.path.join('ranking', 'blyt', 'category_window.brlyt.json5'),
+        os.path.join('ranking', 'blyt', 'category_window_text.brlyt.json5'),
+        os.path.join('ranking', 'ctrl', 'CategoryUpDownText.brctr.json5'),
+        os.path.join('ranking', 'ctrl', 'CategoryUpDownValue.brctr.json5'),
+        os.path.join('ranking', 'ctrl', 'SettingUpDownText.brctr.json5'),
+        os.path.join('ranking', 'ctrl', 'SettingUpDownValue.brctr.json5'),
+        os.path.join('ranking', 'timg', 'tt_pattern_chek_alpha_nasi_32x32.tpl'),
+        os.path.join('ranking', 'timg', 'tt_pattern_chek_bokashi_32x32.tpl'),
+    ],
 }
+
+for language in LANGUAGES:
+    hud_language = HUD_LANGUAGES[language]
+    asset_in_files[os.path.join('Scene', 'UI', f'GlobeSP_{language}.arc.lzma')] = [
+        os.path.join('message', f'Common_{language}.bmg.json5'),
+    ]
+
 asset_out_files = {target: [] for target in asset_in_files}
 for target in asset_in_files:
     for in_file in asset_in_files[target]:
@@ -174,18 +255,10 @@ n.newline()
 
 renamed = {}
 for language in LANGUAGES:
-    renamed[f'jugemu_lap_{language}.brres'] = 'jugemu_lap.brres'
-    renamed[f'jugemu_lapf_{language}.brres'] = 'jugemu_lapf.brres'
-for hud_language in HUD_LANGUAGES.values():
-    renamed[f'tt_lap_{hud_language}.tpl'] = 'tt_lap_E.tpl'
-    renamed[f'tt_lap_{hud_language}_lap1.tpl'] = 'tt_lap_E_Lap1.tpl'
-    renamed[f'tt_lap_{hud_language}_lap2.tpl'] = 'tt_lap_E_lap2.tpl'
-    renamed[f'tt_lap_{hud_language}_lap3.tpl'] = 'tt_lap_E_lap3.tpl'
-    renamed[f'tt_speed_{hud_language}.tpl'] = 'tt_speed.tpl'
-    renamed[f'tt_time_{hud_language}.tpl'] = 'tt_time_E.tpl'
-    for i in range(12):
-        for base in ['tt_position_no_st_64x64', 'tt_multi_position_no_st_64x64']:
-            renamed[f'{base}_{hud_language}_{i + 1:02d}.tpl'] = f'{base}_{i + 1:02d}.tpl'
+    renamed[f'Common_{language}.bmg'] = 'Common.bmg'
+    renamed[f'Menu_{language}.bmg'] = 'Menu.bmg'
+    renamed[f'Race_{language}.bmg'] = 'Race.bmg'
+
 for target in asset_out_files:
     target_renamed = {}
     for out_file in asset_out_files[target]:
@@ -736,18 +809,6 @@ for profile in ['DEBUG', 'TEST', 'RELEASE']:
     )
 
 n.build(
-    os.path.join('$builddir', 'contents.arc.d', 'banner.bin'),
-    'cp',
-    'banner.bin',
-)
-
-n.build(
-    os.path.join('$builddir', 'contents.arc.d', 'channel', 'opening.bnr.lzma'),
-    'lzmac',
-    'opening.bnr',
-)
-
-n.build(
     os.path.join('$builddir', 'bin', 'stubC.elf'),
     'ld',
     code_out_files['CHANNEL']['stub'],
@@ -789,7 +850,6 @@ for profile in ['DEBUG', 'TEST', 'RELEASE']:
         os.path.join('$builddir', 'contents.arc.d', 'bin', f'payloadK{in_suffix}.SMAP.lzma'),
         os.path.join('$builddir', 'contents.arc.d', 'bin', f'loader{in_suffix}.bin.lzma'),
         os.path.join('$builddir', 'contents.arc.d', 'bin', f'version{out_suffix}.bin'),
-        os.path.join('$builddir', 'contents.arc.d', 'banner.bin'),
     ]
     for region in ['P', 'E', 'J', 'K']:
         in_paths += [os.path.join(
@@ -800,7 +860,6 @@ for profile in ['DEBUG', 'TEST', 'RELEASE']:
         )]
     if profile == 'RELEASE':
         in_paths += [
-            os.path.join('$builddir', 'contents.arc.d', 'channel', 'opening.bnr.lzma'),
             os.path.join('$builddir', 'contents.arc.d', 'channel', 'boot.dol.lzma'),
         ]
     n.build(
