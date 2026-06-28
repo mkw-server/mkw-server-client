@@ -1,5 +1,8 @@
 #include "CtrlRacePing.hh"
 
+#include <sp/net/mkw_server/MKWServer.hh>
+#include <sp/net/mkw_server/packets/PingTime.hh>
+
 namespace UI {
 
 namespace GroupId {
@@ -42,16 +45,22 @@ void CtrlRacePing::initSelf() {
     }
 }
 
+void CtrlRacePing::calcPingTime() {
+    MKWServer::PingTime ping = MKWServer::getPingTime();
+
+    m_animator.setAnimationInactive(GroupId::Int0, 0, ping.ms[0]);
+    m_animator.setAnimationInactive(GroupId::Int1, 0, ping.ms[1]);
+    m_animator.setAnimationInactive(GroupId::Int2, 0, ping.ms[2]);
+    m_animator.setAnimationInactive(GroupId::Fract0, 0, ping.ns[0]);
+    m_animator.setAnimationInactive(GroupId::Fract1, 0, ping.ns[1]);
+}
+
 void CtrlRacePing::calcSelf() {
     process();
 
+    calcPingTime();
     // TODO: update() ping_0X panes with calculated ping.
     // setAnimationInactive() has to be called or the game will crash.
-    m_animator.setAnimationInactive(GroupId::Int0, 0, 0);
-    m_animator.setAnimationInactive(GroupId::Int1, 0, 0);
-    m_animator.setAnimationInactive(GroupId::Int2, 0, 0);
-    m_animator.setAnimationInactive(GroupId::Fract0, 0, 0);
-    m_animator.setAnimationInactive(GroupId::Fract1, 0, 0);
 }
 
 void CtrlRacePing::load() {

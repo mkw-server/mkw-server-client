@@ -10,6 +10,7 @@
 #define START_MESSAGE "ST"
 #define PING_MESSAGE "PI"
 #define READY_ACK_MESSAGE "RA"
+#define PING_TIME "PT"
 
 bool isReadyAckPacket(const u8 *message, s32 len) {
     return len == 2 &&
@@ -22,6 +23,10 @@ bool isStartPacket(const u8 *message, s32 len) {
 
 bool isPingPacket(const u8 *message, s32 len) {
     return len == 2 && strncmp((const char *)message, PING_MESSAGE, strlen(PING_MESSAGE)) == 0;
+}
+
+bool isPingTimePacket(const u8 *message, s32 len) {
+    return len == 7 && strncmp((const char *)message, PING_TIME, strlen(PING_TIME)) == 0;
 }
 
 BOOL DWCi_GT2UnrecognizedMessageCallback(GT2Socket socket, u32 ip, u16 port, const u8 *message,
@@ -50,6 +55,11 @@ BOOL DWCi_GT2UnrecognizedMessageCallback(GT2Socket socket, u32 ip, u16 port, con
 
     if (isPingPacket(message, len)) {
         sendPong();
+        return GT2True;
+    }
+
+    if (isPingTimePacket(message, len)) {
+        setPingTime(message);
         return GT2True;
     }
 

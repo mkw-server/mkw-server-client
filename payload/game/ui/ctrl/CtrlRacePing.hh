@@ -12,6 +12,8 @@ public:
     ~CtrlRacePing() override;
 
     void initSelf() override;
+
+    void calcPingTime();
     void calcSelf() override;
 
     void load();

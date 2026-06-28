@@ -18,6 +18,8 @@ static bool s_hasRequestedMKWServerAddress = false;
 static SOSockAddrIn s_mkwServerAddr = {};
 static u64 s_wfcSearchId = 0;
 
+static PingTimePacket s_pingTimePacket = {};
+
 void setMKWServerAddress(u32 addr, u16 port) {
     s_mkwServerAddr.addr.addr = addr;
     s_mkwServerAddr.port = port;
@@ -120,6 +122,14 @@ void sendPong() {
     if (!result) {
         SP_LOG("Failed to send Pong packet to mkw-server! SOSendTo failed!");
     }
+}
+
+void setPingTime(const u8 *message) {
+    memcpy(&s_pingTimePacket, message, sizeof(PingTimePacket));
+}
+
+PingTime getPingTime() {
+    return s_pingTimePacket.pingTime;
 }
 
 bool sendMessageToQR2(const u8 *data, u32 size) {
