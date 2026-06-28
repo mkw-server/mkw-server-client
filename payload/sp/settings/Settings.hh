@@ -7,12 +7,27 @@
 namespace Settings {
 
 // Don't assign values when adding new categories to avoid conflicts and diff noise.
-enum class Category {};
+enum class Category {
+    Online,
+};
 
-enum class Setting {};
+enum class Setting {
+    // Online
+    Ping,
+};
+
+enum class Ping {
+    Disabled,
+    Enabled,
+};
 
 template <Setting S>
 struct OptionType;
+
+template <>
+struct OptionType<Setting::Ping> {
+    using Type = Ping;
+};
 
 // For each new setting, make a new OptionType for the new setting
 template <Setting S>
@@ -20,7 +35,11 @@ using Option = typename OptionType<S>::Type;
 
 constexpr u32 settingCount = magic_enum::enum_count<Setting>();
 
-constexpr u32 categoryMessageIds[]{};
+constexpr u32 categoryMessageIds[]{
+        // clang-format off
+        10002,
+        // clang-format on
+};
 
 struct SettingEntry {
     const Category category;
@@ -37,7 +56,24 @@ struct SettingEntry {
 };
 
 // inline to prevent multiple definition errors at link time
-inline SettingEntry settings[]{};
+inline SettingEntry settings[]{
+        // clang-format off
+        [static_cast<u32>(Setting::Ping)] =
+        {
+            .category = Category::Online,
+            .name = magic_enum::enum_name(Setting::Ping),
+            .messageId = 10003,
+            .valueOffset = 0,
+            .defaultValue = static_cast<u32>(Ping::Disabled),
+            .valueCount = magic_enum::enum_count<Ping>(),
+            .valueNames = magic_enum::enum_names<Ping>().data(),
+            .valueMessageIds = (const s32[]){10004, 10005},
+            .valueExplanationMessageIds = (const s32[]){10006, 10007},
+            .hidden = false,
+            .selectedValue = static_cast<u32>(Ping::Disabled),
+        },
+        // clang-format on
+};
 
 template <Setting S>
 inline void setSetting(Option<S> option) {

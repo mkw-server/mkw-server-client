@@ -191,12 +191,22 @@ asset_in_files = {
         os.path.join('ranking', 'timg', 'tt_pattern_chek_alpha_nasi_32x32.tpl'),
         os.path.join('ranking', 'timg', 'tt_pattern_chek_bokashi_32x32.tpl'),
     ],
+    os.path.join('Scene', 'UI', 'RaceSP.arc.lzma'): [
+        os.path.join('game_image', 'anim', 'game_image_ping_texture_pattern_0_9.brlan.json5'),
+        os.path.join('game_image', 'blyt', 'game_image_ping.brlyt.json5'),
+        os.path.join('game_image', 'ctrl', 'ping_number.brctr.json5'),
+        os.path.join('game_image', 'timg', 'tt_d_number_3d_minus.tpl'),
+        os.path.join('game_image', 'timg', 'tt_d_number_3d_none.tpl'),
+    ],
 }
 
 for language in LANGUAGES:
     hud_language = HUD_LANGUAGES[language]
     asset_in_files[os.path.join('Scene', 'UI', f'GlobeSP_{language}.arc.lzma')] = [
         os.path.join('message', f'Common_{language}.bmg.json5'),
+    ]
+    asset_in_files[os.path.join('Scene', 'UI', f'RaceSP_{language}.arc.lzma')] = [
+        os.path.join("game_image", "timg", f'online_ping_{hud_language}.tpl'),
     ]
 
 asset_out_files = {target: [] for target in asset_in_files}
@@ -258,6 +268,8 @@ for language in LANGUAGES:
     renamed[f'Common_{language}.bmg'] = 'Common.bmg'
     renamed[f'Menu_{language}.bmg'] = 'Menu.bmg'
     renamed[f'Race_{language}.bmg'] = 'Race.bmg'
+for hud_language in HUD_LANGUAGES.values():
+    renamed[f'online_ping_{hud_language}.tpl'] = 'online_ping.tpl'
 
 for target in asset_out_files:
     target_renamed = {}
