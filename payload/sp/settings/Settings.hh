@@ -4,7 +4,7 @@
 
 #include <vendor/magic_enum/magic_enum.hpp>
 
-namespace SP {
+namespace Settings {
 
 // Don't assign values when adding new categories to avoid conflicts and diff noise.
 enum class Category {};
@@ -15,49 +15,46 @@ template <Setting S>
 struct OptionType;
 
 // For each new setting, make a new OptionType for the new setting
-
 template <Setting S>
 using Option = typename OptionType<S>::Type;
 
-class SettingEntry {
-public:
-    constexpr SettingEntry(Category category, const s32 settingNameMessageId,
-            const s32 *optionMessageIds, const s32 *optionDescriptionMessageIds, s32 defaultOption,
-            s32 selectedOption)
-        : m_category(category), m_settingNameMessageId(settingNameMessageId),
-          m_optionMessageIds(optionMessageIds),
-          m_optionDescriptionMessageIds(optionDescriptionMessageIds),
-          m_defaultOption(defaultOption), m_selectedOption(selectedOption) {}
+constexpr u32 settingCount = magic_enum::enum_count<Setting>();
 
-    void setSetting(s32 option) {
-        m_selectedOption = option;
-    }
+constexpr u32 categoryMessageIds[]{};
 
-    s32 getSetting() const {
-        return m_selectedOption;
-    }
-
-private:
-    const Category m_category;
-    const s32 m_settingNameMessageId;
-    const s32 *m_optionMessageIds;
-    const s32 *m_optionDescriptionMessageIds;
-    s32 m_defaultOption;
-    s32 m_selectedOption;
+struct SettingEntry {
+    const Category category;
+    const std::string_view name;
+    const s32 messageId;
+    const u32 valueOffset;
+    const u32 defaultValue;
+    const u32 valueCount;
+    const std::string_view *valueNames;
+    const s32 *valueMessageIds;
+    const s32 *valueExplanationMessageIds;
+    const bool hidden = false;
+    u32 selectedValue;
 };
 
-SettingEntry settings[]{
-
-};
+// inline to prevent multiple definition errors at link time
+inline SettingEntry settings[]{};
 
 template <Setting S>
-void setSetting(Option<S> option) {
-    settings[static_cast<size_t>(S)].setSetting(static_cast<s32>(option));
+inline void setSetting(Option<S> option) {
+    settings[static_cast<size_t>(S)].selectedValue = static_cast<u32>(option);
 }
 
 template <Setting S>
-Option<S> getSetting() {
-    return static_cast<Option<S>>(settings[static_cast<size_t>(S)].getSetting());
+inline Option<S> getSetting() {
+    return static_cast<Option<S>>(settings[static_cast<size_t>(S)].selectedValue);
 }
 
-} // namespace SP
+inline void setSetting(u32 setting, u32 option) {
+    settings[setting].selectedValue = option;
+}
+
+inline u32 getSetting(u32 index) {
+    return settings[index].selectedValue;
+}
+
+} // namespace Settings

@@ -190,6 +190,7 @@ public:
         Both,
         Y,
         Neither,
+        XY,
     };
 
     MultiControlInputManager();
