@@ -1,4 +1,10 @@
 {
     "10000": "Impostazioni",
     "10001": "TODO",
+    "10002": "Online",
+    "10003": "Display Ping",
+    "10004": "Disabled",
+    "10005": "Enabled",
+    "10006": "Ping display is disabled",
+    "10007": "Ping display is enabled",
 }

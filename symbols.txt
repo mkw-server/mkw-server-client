@@ -586,6 +586,7 @@
 0x8062c3a4 _ZN2UI7Section8addPagesENS_9SectionIdE
 0x80630094 _ZN2UI7Section14addActivePagesENS_9SectionIdE
 0x80631588 _ZN2UI7Section10GetSceneIdENS_9SectionIdE
+0x80633d44 _ZNK2UI8RacePage19getNameBalloonCountEv
 0x80634fbc _ZN2UI14SectionManager13createSectionEv
 0x8063c3ec _ZN2UI10UIAnimatorC1Ev
 0x8063c3ec _ZN2UI10UIAnimatorC1Ev
@@ -748,6 +749,7 @@
 0x807e9c04 _ZN2UI18CtrlMenuBackButton5vf_28Ev
 0x807ebe40 _ZN2UI12CtrlRaceBase5vf_44Ev
 0x807ebf14 _ZN2UI12CtrlRaceBase11getTypeNameEv
+0x807ebf20 _ZN2UI12CtrlRaceBase12setPaneColorEPKcb
 0x807ec20c _ZN2UI12CtrlRaceBase5vf_40Ev
 0x807ec3b0 _ZN2UI12CtrlRaceBase5vf_48Ev
 0x807ec3c4 _ZN2UI12CtrlRaceBase5vf_4cEv
@@ -755,6 +757,12 @@
 0x807ec6e8 _ZN2UI12CtrlRaceBase8initSelfEv
 0x807ec8ec _ZN2UI12CtrlRaceBase5vf_28Ev
 0x807f826c _ZNK2UI4Page2idEv
+0x808569bc _ZN2UI8RacePage5vf_70Ev
+0x808572d4 _ZN2UI8RacePage5vf_74Ev
+0x8085732c _ZN2UI8RacePage5vf_7cEv
+0x808573ac _ZN2UI8RacePage5vf_78Ev
+0x80857b08 _ZNK2UI8RacePage15getControlCountEj
+0x80857cc0 _ZN2UI8RacePage12initControlsEj
 # REL .text end (0x8088F400)
 
 # REL .rodata start (0x8088F720)
