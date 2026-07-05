@@ -21,11 +21,16 @@ public:
         OfflineBT = 3,
         Mission = 4,
         OnlinePrivateVS = 7,
+        OnlinePublicVS = 8,
         OnlinePrivateBT = 10,
         Awards = 11,
     };
 
     struct Scenario {
+        bool isOnlineVS() const {
+            return gameMode == GameMode::OnlinePrivateVS || gameMode == GameMode::OnlinePublicVS;
+        }
+
         u8 _000[0xb50 - 0x000];
         GameMode gameMode;
         u8 _b54[0xbf0 - 0xb54];

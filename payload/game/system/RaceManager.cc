@@ -4,6 +4,7 @@
 #include "game/system/RaceConfig.hh"
 
 #include <sp/SaveStateManager.hh>
+#include <sp/net/mkw_server/MKWServer.hh>
 
 extern "C" {
 #include <revolution.h>
@@ -56,6 +57,19 @@ void RaceManager::Player::calc() {
         if (auto *saveStateManager = SP::SaveStateManager::Instance()) {
             saveStateManager->processInput(isLoadButtonPressed);
         }
+    }
+}
+
+void RaceManager::Player::endLap() {
+    REPLACED(endLap)();
+
+    // To speed up lag start public testing, end the race after one lap. Checking both the
+    // gameMode and if we're connected to mkw-server is a safety net.
+    bool isOnlineVS = RaceConfig::Instance()->raceScenario().isOnlineVS();
+    if (isOnlineVS && MKWServer::hasMKWServerAddress() && m_currentLap == 2) {
+        Timer timer;
+        getLapSplit(1, &timer);
+        endRace(&timer, false, 1);
     }
 }
 

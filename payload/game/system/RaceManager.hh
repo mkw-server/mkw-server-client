@@ -8,6 +8,18 @@ namespace System {
 
 class RaceManager {
 public:
+    class Timer {
+    public:
+        u8 _0[0x4 - 0x0];
+        s16 m_minutes;
+        u8 m_seconds;
+        u8 _7[0x8 - 0x7];
+        u16 m_milliseconds;
+        bool m_isValid;
+        u8 _b[0xc - 0xb];
+    };
+    static_assert(sizeof(Timer) == 0xc);
+
     enum class RaceState {
         IntroCamera = 0,
         Countdown = 1,
@@ -26,9 +38,18 @@ public:
         REPLACE void calc();
         void REPLACED(calc)();
 
+        REPLACE void endLap();
+        void REPLACED(endLap)();
+
+        void endRace(Timer *timer, bool hasNoCameras, s32 r6);
+
+        void getLapSplit(s32 lap, Timer *timer);
+
         u8 _00[0x08 - 0x00];
         u8 m_playerId;
-        u8 _09[0x48 - 0x09];
+        u8 _09[0x24 - 0x09];
+        s16 m_currentLap;
+        u8 _26[0x48 - 0x26];
         PadProxy *m_padProxy;
         u8 _4c[0x54 - 0x4c];
     };
