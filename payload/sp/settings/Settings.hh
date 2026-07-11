@@ -85,7 +85,8 @@ inline SettingEntry settings[]{
             .valueMessageIds = (const s32[]){10004, 10005},
             .valueExplanationMessageIds = (const s32[]){10006, 10007},
             .hidden = false,
-            .selectedValue = static_cast<u32>(Ping::Disabled),
+            // Default value
+            .selectedValue = static_cast<u32>(Ping::Enabled),
         },
         [static_cast<u32>(Setting::ItemWheel)] =
         {
