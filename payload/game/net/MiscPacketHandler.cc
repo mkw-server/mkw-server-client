@@ -1,5 +1,7 @@
 #include "MiscPacketHandler.hh"
 
+#include "game/system/RaceManager.hh"
+
 #include <sp/net/mkw_server/MKWServer.hh>
 
 namespace Net {
@@ -11,17 +13,18 @@ void MiscPacketHandler::setAckReady() {
 void MiscPacketHandler::init() {
     REPLACED(init)();
 
-    m_timeUntilReady = 240;
+    m_tryAgainFrames = 0;
     m_readyAcked = false;
 }
 
 void MiscPacketHandler::updateReadyTimer() {
-    if (m_timeUntilReady > 0) {
-        m_timeUntilReady--;
-    } else {
+    if (m_tryAgainFrames > 0) {
+        m_tryAgainFrames--;
+    };
+    if (m_tryAgainFrames == 0 && System::RaceManager::Instance()->introTimer() > 0xd0) {
+        SP_LOG("Sending Ready Packet!");
         MKWServer::sendReadyPacket();
-        // Until we get an ack, try to send again in 5 frames.
-        m_timeUntilReady = 5;
+        m_tryAgainFrames = 5;
     }
 }
 
