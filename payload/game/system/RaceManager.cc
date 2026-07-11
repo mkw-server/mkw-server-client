@@ -5,6 +5,7 @@
 
 #include <sp/SaveStateManager.hh>
 #include <sp/net/mkw_server/MKWServer.hh>
+#include <sp/settings/Settings.hh>
 
 extern "C" {
 #include <revolution.h>
@@ -16,12 +17,16 @@ namespace System {
 void RaceManager::Player::calc() {
     REPLACED(calc)();
 
+    auto isItemWheelEnabled =
+            Settings::getSetting<Settings::Setting::ItemWheel>() == Settings::ItemWheel::Enabled;
+
     // Check if user wants to load state, rotate items, or use pow.
     auto *raceConfig = System::RaceConfig::Instance();
     auto gameMode = raceConfig->raceScenario().gameMode;
     // These settings are exclusive to TTs. We check for playerId to prevent unintended behavior
     // from ghosts.
-    if (gameMode == System::RaceConfig::GameMode::TimeAttack && m_playerId == 0) {
+    if (isItemWheelEnabled && gameMode == System::RaceConfig::GameMode::TimeAttack &&
+            m_playerId == 0) {
         auto *playerPadProxy = m_padProxy;
         auto buttons = playerPadProxy->currentRaceInputState().rawButtons;
         auto controller = playerPadProxy->pad()->getControllerId();

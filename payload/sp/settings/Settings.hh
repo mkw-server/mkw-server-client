@@ -9,14 +9,23 @@ namespace Settings {
 // Don't assign values when adding new categories to avoid conflicts and diff noise.
 enum class Category {
     Online,
+    TTs,
 };
 
 enum class Setting {
     // Online
     Ping,
+
+    // TTs
+    ItemWheel,
 };
 
 enum class Ping {
+    Disabled,
+    Enabled,
+};
+
+enum class ItemWheel {
     Disabled,
     Enabled,
 };
@@ -29,6 +38,11 @@ struct OptionType<Setting::Ping> {
     using Type = Ping;
 };
 
+template <>
+struct OptionType<Setting::ItemWheel> {
+    using Type = ItemWheel;
+};
+
 // For each new setting, make a new OptionType for the new setting
 template <Setting S>
 using Option = typename OptionType<S>::Type;
@@ -38,6 +52,7 @@ constexpr u32 settingCount = magic_enum::enum_count<Setting>();
 constexpr u32 categoryMessageIds[]{
         // clang-format off
         10002,
+        10008,
         // clang-format on
 };
 
@@ -71,6 +86,20 @@ inline SettingEntry settings[]{
             .valueExplanationMessageIds = (const s32[]){10006, 10007},
             .hidden = false,
             .selectedValue = static_cast<u32>(Ping::Disabled),
+        },
+        [static_cast<u32>(Setting::ItemWheel)] =
+        {
+            .category = Category::TTs,
+            .name = magic_enum::enum_name(Setting::ItemWheel),
+            .messageId = 10009,
+            .valueOffset = 0,
+            .defaultValue = static_cast<u32>(ItemWheel::Disabled),
+            .valueCount = magic_enum::enum_count<ItemWheel>(),
+            .valueNames = magic_enum::enum_names<ItemWheel>().data(),
+            .valueMessageIds = (const s32[]){10004, 10005},
+            .valueExplanationMessageIds = (const s32[]){10010, 10011},
+            .hidden = false,
+            .selectedValue = static_cast<u32>(ItemWheel::Disabled),
         },
         // clang-format on
 };

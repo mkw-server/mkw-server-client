@@ -7,4 +7,8 @@
     "10005": "Enabled",
     "10006": "Ping display is disabled",
     "10007": "Ping display is enabled",
+    "10008": "Time Trials",
+    "10009": "Item Wheel",
+    "10010": "Item Wheel is disabled",
+    "10011": "Press Y (GCN), A (Wheel), down DPAD (Chuck), or ZL (CC/CCP) to cycle items",
 }

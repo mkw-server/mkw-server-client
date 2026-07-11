@@ -2,6 +2,8 @@
 
 #include "game/system/RaceConfig.hh"
 
+#include <sp/settings/Settings.hh>
+
 extern "C" {
 #include <revolution.h>
 }
@@ -9,17 +11,28 @@ extern "C" {
 namespace Item {
 
 void ItemInventory::resetItem() {
+    auto isItemWheelEnabled =
+            Settings::getSetting<Settings::Setting::ItemWheel>() == Settings::ItemWheel::Enabled;
+
     auto *raceConfig = System::RaceConfig::Instance();
-    if (raceConfig->raceScenario().gameMode != System::RaceConfig::GameMode::TimeAttack) {
-        REPLACED(resetItem)();
+    if (isItemWheelEnabled &&
+            raceConfig->raceScenario().gameMode == System::RaceConfig::GameMode::TimeAttack) {
+        return;
     }
+    REPLACED(resetItem)();
 }
 
 void ItemInventory::resetHeldItem() {
+    auto isItemWheelEnabled =
+            Settings::getSetting<Settings::Setting::ItemWheel>() == Settings::ItemWheel::Enabled;
+
     auto *raceConfig = System::RaceConfig::Instance();
-    if (raceConfig->raceScenario().gameMode != System::RaceConfig::GameMode::TimeAttack) {
-        REPLACED(resetHeldItem)();
+
+    if (isItemWheelEnabled &&
+            raceConfig->raceScenario().gameMode == System::RaceConfig::GameMode::TimeAttack) {
+        return;
     }
+    REPLACED(resetHeldItem)();
 }
 
 ItemId ItemInventory::getCurrentItem() const {
