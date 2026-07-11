@@ -34,7 +34,8 @@ private:
     void update();
 
     // Added.
-    // Updates m_timeUntilReady. Calls MKWServer::sendReadyPacket() when m_timeUntilReady is 0.
+    // Calls MKWServer::sendReadyPacket() RaceManager::m_introTimer is > 0xd0. Retrys after
+    // 5 frames (m_tryAgainFrames) until an ack is received.
     void updateReadyTimer();
 
     // 0x80654150
@@ -76,7 +77,7 @@ private:
     // This is initialized to 240 frames (4 seconds) at the start of each race to account
     // for the intro camera pan, and decremented each frame. When the timer is 0, send
     // a ready packet to mkw-server.
-    u8 m_timeUntilReady;
+    u8 m_tryAgainFrames;
 
     // Added, was padding. Set when mkw-server has acked our ready packet.
     bool m_readyAcked;
