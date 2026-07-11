@@ -33,6 +33,15 @@ void MiscPacketHandler::updateAsRacer() {
     REPLACED(updateAsRacer)();
 }
 
+void MiscPacketHandler::processRH1Records() {
+    REPLACED(processRH1Records)();
+
+    if (m_scheduleDisconnect) {
+        SP_LOG("Schedule disconnect was set!");
+        m_scheduleDisconnect = false;
+    }
+}
+
 } // namespace Net
 
 void MiscPacketHandler_setAckReady() {

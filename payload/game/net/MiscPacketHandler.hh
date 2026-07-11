@@ -51,7 +51,10 @@ private:
     // 0x806554a0
     // Unpacks and processes received RH1 records. Updates m_aidsLoadedIntoRace and time of other
     // players. Also checks if we're out of sync of other players and disconnects us if so.
-    void processRecvRH1Records();
+    // Hooked to log if m_scheduleDisconnect still gets set under lag start fix and flip it to
+    // not cause disconnects for the sake of testing.
+    REPLACE void processRH1Records();
+    void REPLACED(processRH1Records)();
 
     // 0x80654038
     // Returns true when all players have loaded into the race
