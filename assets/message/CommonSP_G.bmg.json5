@@ -11,4 +11,8 @@
     "10009": "Item Wheel",
     "10010": "Item Wheel is disabled",
     "10011": "Press Y (GCN), A (Wheel), down DPAD (Chuck), or ZL (CC/CCP) to cycle items", 
+    "10012": "Misc",
+    "10013": "Unlock Everything",
+    "10014": "Characters/Vehicles/Cups unlocked in your vanilla save file are unlocked",
+    "10015": "WARNING! Untested! Could impact save game! Use at your own risk!",
 }

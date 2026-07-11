@@ -10,6 +10,7 @@ namespace Settings {
 enum class Category {
     Online,
     TTs,
+    Misc,
 };
 
 enum class Setting {
@@ -18,6 +19,9 @@ enum class Setting {
 
     // TTs
     ItemWheel,
+
+    // Misc
+    UnlockEverything,
 };
 
 enum class Ping {
@@ -26,6 +30,11 @@ enum class Ping {
 };
 
 enum class ItemWheel {
+    Disabled,
+    Enabled,
+};
+
+enum class UnlockEverything {
     Disabled,
     Enabled,
 };
@@ -43,6 +52,11 @@ struct OptionType<Setting::ItemWheel> {
     using Type = ItemWheel;
 };
 
+template <>
+struct OptionType<Setting::UnlockEverything> {
+    using Type = UnlockEverything;
+};
+
 // For each new setting, make a new OptionType for the new setting
 template <Setting S>
 using Option = typename OptionType<S>::Type;
@@ -53,6 +67,7 @@ constexpr u32 categoryMessageIds[]{
         // clang-format off
         10002,
         10008,
+        10012,
         // clang-format on
 };
 
@@ -101,6 +116,20 @@ inline SettingEntry settings[]{
             .valueExplanationMessageIds = (const s32[]){10010, 10011},
             .hidden = false,
             .selectedValue = static_cast<u32>(ItemWheel::Disabled),
+        },
+        [static_cast<u32>(Setting::UnlockEverything)] =
+        {
+            .category = Category::Misc,
+            .name = magic_enum::enum_name(Setting::UnlockEverything),
+            .messageId = 10013,
+            .valueOffset = 0,
+            .defaultValue = static_cast<u32>(UnlockEverything::Disabled),
+            .valueCount = magic_enum::enum_count<UnlockEverything>(),
+            .valueNames = magic_enum::enum_names<UnlockEverything>().data(),
+            .valueMessageIds = (const s32[]){10004, 10005},
+            .valueExplanationMessageIds = (const s32[]){10014, 10015},
+            .hidden = false,
+            .selectedValue = static_cast<u32>(UnlockEverything::Disabled),
         },
         // clang-format on
 };

@@ -198,6 +198,17 @@ enum class Vote : u8 {
     Random = 0xFF,
 };
 
+enum class Cup {
+    Mushroom = 0x0,
+    Flower = 0x1,
+    Star = 0x2,
+    Special = 0x3,
+    Shell = 0x4,
+    Banana = 0x5,
+    Leaf = 0x6,
+    Lightning = 0x7,
+};
+
 enum class Team {
     Red = 0x00,
     Blue = 0x01,
@@ -212,5 +223,14 @@ enum class EngineClass {
 };
 
 extern const Course OrderedCourses[0x20];
+
+REPLACE bool isCharacterUnlocked(Character character, bool r4);
+bool REPLACED(isCharacterUnlocked)(Character character, bool r4);
+
+REPLACE bool isVehicleUnlocked(Vehicle vehicle, bool r4);
+bool REPLACED(isVehicleUnlocked)(Vehicle vehicle, bool r4);
+
+REPLACE bool isCupUnlocked(Cup cup, bool r4, bool r5);
+bool REPLACED(isCupUnlocked)(Cup cup, bool r4, bool r5);
 
 } // namespace Registry
