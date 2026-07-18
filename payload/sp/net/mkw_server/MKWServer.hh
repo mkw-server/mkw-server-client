@@ -6,7 +6,9 @@ extern "C" {
 #include <sp/net/mkw_server/MKWServerTypes.h>
 }
 
+#include <sp/net/mkw_server/packets/PingTime.hh>
 #include <sp/net/mkw_server/packets/SearchId.hh>
+
 namespace MKWServer {
 
 void setMKWServerAddress(u32 addr, u16 port);
@@ -19,11 +21,19 @@ u64 getSearchId();
 
 bool hasMKWServerAddress();
 
+void sendReadyPacket();
+
+PingTime getPing();
+
 EXTERN_C bool trySendRacePacketToMKWServer(const void *data, u32 size);
 
 EXTERN_C bool verifySearchIdMagic(const u8 *packet, u32 size);
 
 EXTERN_C bool handleSearchIdPacket(const u8 *packet, u32 size);
+
+EXTERN_C void sendPong();
+
+EXTERN_C void setPingTime(const u8 *message);
 
 bool sendMessageToQR2(const u8 *data, u32 size);
 } // namespace MKWServer

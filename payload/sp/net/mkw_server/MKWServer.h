@@ -7,3 +7,7 @@
 EXTERN_C bool verifySearchIdMagic(const u8 *packet, u32 size);
 
 EXTERN_C bool handleSearchIdPacket(const u8 *packet, u32 size);
+
+EXTERN_C void sendPong();
+
+EXTERN_C void setPingTime(const u8 *message);

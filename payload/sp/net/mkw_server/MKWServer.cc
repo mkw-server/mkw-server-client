@@ -11,12 +11,18 @@ extern "C" {
 
 #include <string.h>
 
+constexpr char READY_PACKET[] = "RE";
+constexpr char PONG_PACKET[] = "PO";
+
 namespace MKWServer {
+
 #define SEARCH_ID_MAGIC "SEARCHID"
 
 static bool s_hasRequestedMKWServerAddress = false;
 static SOSockAddrIn s_mkwServerAddr = {};
 static u64 s_wfcSearchId = 0;
+
+static PingTime s_ping = {};
 
 void setMKWServerAddress(u32 addr, u16 port) {
     s_mkwServerAddr.addr.addr = addr;
@@ -53,6 +59,23 @@ bool hasMKWServerAddress() {
     return s_mkwServerAddr.addr.addr != 0 && s_mkwServerAddr.port != 0;
 }
 
+void sendReadyPacket() {
+    if (!hasMKWServerAddress()) {
+        SP_LOG("Can't send Ready packet: Don't have mkw-server address!");
+        return;
+    }
+
+    bool result = SOSendTo(s_dwcMatch->qrec->hbsock, READY_PACKET, strlen(READY_PACKET), 0,
+            &s_mkwServerAddr);
+    if (!result) {
+        SP_LOG("Failed to send Ready packet to mkw-server! SOSendTo failed!");
+    }
+}
+
+PingTime getPing() {
+    return s_ping;
+}
+
 bool trySendRacePacketToMKWServer(const void *data, u32 size) {
     if (!hasMKWServerAddress()) {
         return false;
@@ -60,7 +83,7 @@ bool trySendRacePacketToMKWServer(const void *data, u32 size) {
 
     bool result = SOSendTo(s_dwcMatch->qrec->hbsock, data, size, 0, &s_mkwServerAddr);
     if (!result) {
-        SP_LOG("Failed to send to MKW Server!");
+        SP_LOG("Failed to send Race packet to mkw-server!");
     }
     return result;
 }
@@ -92,6 +115,23 @@ bool handleSearchIdPacket(const u8 *packet, u32 size) {
     }
 
     return true;
+}
+
+void sendPong() {
+    if (!hasMKWServerAddress()) {
+        SP_LOG("Can't send Pong packet: Don't have mkw-server address!");
+        return;
+    }
+
+    bool result = SOSendTo(s_dwcMatch->qrec->hbsock, PONG_PACKET, strlen(PONG_PACKET), 0,
+            &s_mkwServerAddr);
+    if (!result) {
+        SP_LOG("Failed to send Pong packet to mkw-server! SOSendTo failed!");
+    }
+}
+
+void setPingTime(const u8 *message) {
+    memcpy(&s_ping, message + sizeof(PingTimePacket::magic), sizeof(PingTime));
 }
 
 bool sendMessageToQR2(const u8 *data, u32 size) {

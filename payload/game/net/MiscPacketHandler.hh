@@ -16,16 +16,36 @@ namespace Net {
 
 // MiscPacketHandler runs exclusively in race scene. It handles everything netcode during a race.
 class MiscPacketHandler {
+public:
+    // Added. sets m_readyAcked
+    void setAckReady();
+
+    static MiscPacketHandler *Instance() {
+        return s_instance;
+    }
+
 private:
+    // 0x806532d8
+    // Initializes members. Called by RaceScene::initSubsystems() once per race.
+    // Hooked to reset m_readyRetryCooldown and m_readyAcked at the start of the race.
+    REPLACE void init();
+    void REPLACED(init)();
+
     // 0x80653728
     // The main loop. Runs when m_isPrepared is true. This runs in online races
     // but also rival ghost races to update friend status
     void update();
 
+    // Added.
+    // Sends a ready packet to mkw-server if we're "ready" to start the race.
+    void trySendReady();
+
     // 0x80654150
     // Runs only when racing. Synchronizes race start, imports, exports, and processes records
     // specifically as a racer.
-    void updateAsRacer();
+    // Hooked to call trySendReady() until we receive an ack from mkw-server.
+    REPLACE void updateAsRacer();
+    void REPLACED(updateAsRacer)();
 
     // 0x80654d08
     // Exports relevant records as a racer (as opposed to a spectator)
@@ -55,8 +75,11 @@ private:
     // Schecules a disconnect. Set if we're out of sync with other players.
     bool m_scheduleDisconnect;
 
-    // Padding
-    u8 _002[0x004 - 0x002];
+    // Added, was padding. Cooldown in frames before resending a ready packet to mkw-server.
+    u8 m_readyRetryCooldown;
+
+    // Added, was padding. Set when mkw-server has acked our ready packet.
+    bool m_readyAcked;
 
     // Bitfield set by RH1.raceSeed
     u32 m_aidsLoadedIntoRace;
@@ -94,3 +117,7 @@ private:
 static_assert(sizeof(MiscPacketHandler) == 0x1c8);
 
 } // namespace Net
+
+// Exposed to C b/c UDP packets are handled in a C function (DWCi_GT2UnrecognizedMessageCallback).
+// TODO: Rewrite in C++.
+extern "C" void MiscPacketHandler_setAckReady();
