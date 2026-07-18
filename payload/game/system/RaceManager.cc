@@ -64,5 +64,8 @@ void RaceManager::Player::calc() {
 void RaceManager_startCountdown() {
     if (auto *raceManager = System::RaceManager::Instance()) {
         raceManager->startCountdown();
+    } else {
+        // Shouldn't happen but log it if it does.
+        SP_LOG("RaceManager_startCountdown() called but RaceManager is nullptr!");
     }
 }

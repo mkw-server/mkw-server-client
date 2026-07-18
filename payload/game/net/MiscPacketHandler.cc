@@ -4,6 +4,12 @@
 
 #include <sp/net/mkw_server/MKWServer.hh>
 
+// Time the intro camera rotation will finish by. It actually finishes after 170 frames,
+// but 30 frames are added to be safe.
+static constexpr u16 INTRO_CAMERA_ROTATION_FINISH_TIME = 200;
+
+static constexpr u8 READY_RETRY_COOLDOWN = 5;
+
 namespace Net {
 
 void MiscPacketHandler::setAckReady() {
@@ -13,24 +19,27 @@ void MiscPacketHandler::setAckReady() {
 void MiscPacketHandler::init() {
     REPLACED(init)();
 
-    m_tryAgainFrames = 0;
+    m_readyRetryCooldown = 0;
     m_readyAcked = false;
 }
 
-void MiscPacketHandler::updateReadyTimer() {
-    if (m_tryAgainFrames > 0) {
-        m_tryAgainFrames--;
-    };
-    if (m_tryAgainFrames == 0 && System::RaceManager::Instance()->introTimer() > 0xd0) {
+void MiscPacketHandler::trySendReady() {
+    if (m_readyRetryCooldown > 0) {
+        m_readyRetryCooldown--;
+        return;
+    }
+
+    // Send a ready packet when the intro camera has finished rotating.
+    if (System::RaceManager::Instance()->introTimer() > INTRO_CAMERA_ROTATION_FINISH_TIME) {
         SP_LOG("Sending Ready Packet!");
         MKWServer::sendReadyPacket();
-        m_tryAgainFrames = 5;
+        m_readyRetryCooldown = READY_RETRY_COOLDOWN;
     }
 }
 
 void MiscPacketHandler::updateAsRacer() {
     if (!m_readyAcked) {
-        updateReadyTimer();
+        trySendReady();
     }
 
     REPLACED(updateAsRacer)();
@@ -42,5 +51,7 @@ void MiscPacketHandler_setAckReady() {
     // Need to check for nullptr in case if an ack is unexpectedly sent outside of race scene.
     if (auto *miscPacketHandler = Net::MiscPacketHandler::Instance()) {
         miscPacketHandler->setAckReady();
+    } else {
+        SP_LOG("MiscPacketHandler_setAckReady() called outside of RaceScene!");
     }
 }

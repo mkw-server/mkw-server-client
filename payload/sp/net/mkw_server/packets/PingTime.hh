@@ -10,6 +10,7 @@ struct PingTime {
 } __attribute__((packed));
 static_assert(sizeof(PingTime) == 5);
 
+// DONT CHANGE SIZE!!! SEE PING_TIME_PACKET_LEN in DWCTransport.c !!!
 struct PingTimePacket {
     u8 magic[2];
     PingTime pingTime;

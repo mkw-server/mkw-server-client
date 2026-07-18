@@ -3,7 +3,10 @@
 #include <Common.hh>
 
 #include "game/net/records/Event.hh"
+#include "game/net/records/RH1.hh"
+#include "game/net/records/RH2.hh"
 #include "game/net/records/RaceData.hh"
+#include "game/net/records/Select.hh"
 
 extern "C" {
 #include <revolution/os.h>
@@ -23,8 +26,8 @@ public:
 
 private:
     // 0x806532d8
-    // Called exactly once at the start of a race to initialize members.
-    // Hooked to initialize mkw-server members.
+    // Initializes members. Called by RaceScene::initSubsystems() once per race.
+    // Hooked to reset m_readyRetryCooldown and m_readyAcked at the start of the race.
     REPLACE void init();
     void REPLACED(init)();
 
@@ -34,14 +37,13 @@ private:
     void update();
 
     // Added.
-    // Calls MKWServer::sendReadyPacket() RaceManager::m_introTimer is > 0xd0. Retrys after
-    // 5 frames (m_tryAgainFrames) until an ack is received.
-    void updateReadyTimer();
+    // Sends a ready packet to mkw-server if we're "ready" to start the race.
+    void trySendReady();
 
     // 0x80654150
     // Runs only when racing. Synchronizes race start, imports, exports, and processes records
     // specifically as a racer.
-    // Hooked to handle mkw-server client synchronization.
+    // Hooked to call trySendReady() until we receive an ack from mkw-server.
     REPLACE void updateAsRacer();
     void REPLACED(updateAsRacer)();
 
@@ -73,11 +75,8 @@ private:
     // Schecules a disconnect. Set if we're out of sync with other players.
     bool m_scheduleDisconnect;
 
-    // Added, was padding. Time (in frames) until we're ready to start the countdown.
-    // This is initialized to 240 frames (4 seconds) at the start of each race to account
-    // for the intro camera pan, and decremented each frame. When the timer is 0, send
-    // a ready packet to mkw-server.
-    u8 m_tryAgainFrames;
+    // Added, was padding. Cooldown in frames before resending a ready packet to mkw-server.
+    u8 m_readyRetryCooldown;
 
     // Added, was padding. Set when mkw-server has acked our ready packet.
     bool m_readyAcked;

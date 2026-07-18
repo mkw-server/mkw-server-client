@@ -11,14 +11,18 @@ extern "C" {
 
 #include <string.h>
 
+constexpr char READY_PACKET[] = "RE";
+constexpr char PONG_PACKET[] = "PO";
+
 namespace MKWServer {
+
 #define SEARCH_ID_MAGIC "SEARCHID"
 
 static bool s_hasRequestedMKWServerAddress = false;
 static SOSockAddrIn s_mkwServerAddr = {};
 static u64 s_wfcSearchId = 0;
 
-static PingTimePacket s_pingTimePacket = {};
+static PingTime s_ping = {};
 
 void setMKWServerAddress(u32 addr, u16 port) {
     s_mkwServerAddr.addr.addr = addr;
@@ -57,16 +61,19 @@ bool hasMKWServerAddress() {
 
 void sendReadyPacket() {
     if (!hasMKWServerAddress()) {
-        SP_LOG("sendReady() can't send: Don't have mkw-server address!");
+        SP_LOG("Can't send Ready packet: Don't have mkw-server address!");
         return;
     }
 
-    u8 msg[2] = {0x52, 0x45}; // RE
-
-    bool result = SOSendTo(s_dwcMatch->qrec->hbsock, &msg, sizeof(msg), 0, &s_mkwServerAddr);
+    bool result = SOSendTo(s_dwcMatch->qrec->hbsock, READY_PACKET, strlen(READY_PACKET), 0,
+            &s_mkwServerAddr);
     if (!result) {
-        SP_LOG("Failed to send Race packet to mkw-server! SOSendTo failed!");
+        SP_LOG("Failed to send Ready packet to mkw-server! SOSendTo failed!");
     }
+}
+
+PingTime getPing() {
+    return s_ping;
 }
 
 bool trySendRacePacketToMKWServer(const void *data, u32 size) {
@@ -112,24 +119,19 @@ bool handleSearchIdPacket(const u8 *packet, u32 size) {
 
 void sendPong() {
     if (!hasMKWServerAddress()) {
-        SP_LOG("sendPong() can't send: Don't have mkw-server address!");
+        SP_LOG("Can't send Pong packet: Don't have mkw-server address!");
         return;
     }
 
-    u8 msg[2] = {0x50, 0x4F}; // PO
-
-    bool result = SOSendTo(s_dwcMatch->qrec->hbsock, &msg, sizeof(msg), 0, &s_mkwServerAddr);
+    bool result = SOSendTo(s_dwcMatch->qrec->hbsock, PONG_PACKET, strlen(PONG_PACKET), 0,
+            &s_mkwServerAddr);
     if (!result) {
         SP_LOG("Failed to send Pong packet to mkw-server! SOSendTo failed!");
     }
 }
 
 void setPingTime(const u8 *message) {
-    memcpy(&s_pingTimePacket, message, sizeof(PingTimePacket));
-}
-
-PingTime getPingTime() {
-    return s_pingTimePacket.pingTime;
+    memcpy(&s_ping, message + sizeof(PingTimePacket::magic), sizeof(PingTime));
 }
 
 bool sendMessageToQR2(const u8 *data, u32 size) {

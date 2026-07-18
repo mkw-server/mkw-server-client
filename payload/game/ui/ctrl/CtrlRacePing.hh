@@ -13,7 +13,9 @@ public:
 
     void initSelf() override;
 
+    // Updates the control to the ping.
     void calcPingTime();
+
     void calcSelf() override;
 
     void load();

@@ -46,7 +46,7 @@ void CtrlRacePing::initSelf() {
 }
 
 void CtrlRacePing::calcPingTime() {
-    MKWServer::PingTime ping = MKWServer::getPingTime();
+    MKWServer::PingTime ping = MKWServer::getPing();
 
     m_animator.setAnimationInactive(GroupId::Int0, 0, ping.ms[0]);
     m_animator.setAnimationInactive(GroupId::Int1, 0, ping.ms[1]);

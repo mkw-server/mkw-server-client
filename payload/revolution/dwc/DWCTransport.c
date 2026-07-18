@@ -11,22 +11,24 @@
 #define PING_MESSAGE "PI"
 #define READY_ACK_MESSAGE "RA"
 #define PING_TIME "PT"
+// TODO: Don't hardcode size.
+#define PING_TIME_PACKET_LEN 7
 
 bool isReadyAckPacket(const u8 *message, s32 len) {
-    return len == 2 &&
-            strncmp((const char *)message, READY_ACK_MESSAGE, strlen(READY_ACK_MESSAGE)) == 0;
+    return len == strlen(READY_ACK_MESSAGE) && memcmp(message, READY_ACK_MESSAGE, len) == 0;
 }
 
 bool isStartPacket(const u8 *message, s32 len) {
-    return len == 2 && strncmp((const char *)message, START_MESSAGE, strlen(START_MESSAGE)) == 0;
+    return len == strlen(START_MESSAGE) && memcmp(message, START_MESSAGE, len) == 0;
 }
 
 bool isPingPacket(const u8 *message, s32 len) {
-    return len == 2 && strncmp((const char *)message, PING_MESSAGE, strlen(PING_MESSAGE)) == 0;
+    return len == strlen(PING_MESSAGE) && memcmp(message, PING_MESSAGE, len) == 0;
 }
 
 bool isPingTimePacket(const u8 *message, s32 len) {
-    return len == 7 && strncmp((const char *)message, PING_TIME, strlen(PING_TIME)) == 0;
+    // This packet contains data. Check the packet length, not the length of the magic.
+    return len == PING_TIME_PACKET_LEN && memcmp(message, PING_TIME, strlen(PING_TIME)) == 0;
 }
 
 BOOL DWCi_GT2UnrecognizedMessageCallback(GT2Socket socket, u32 ip, u16 port, const u8 *message,
