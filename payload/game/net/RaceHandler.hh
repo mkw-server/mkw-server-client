@@ -4,7 +4,6 @@
 
 #include "game/net/records/Event.hh"
 #include "game/net/records/RH1.hh"
-#include "game/net/records/RH2.hh"
 #include "game/net/records/RaceData.hh"
 #include "game/net/records/Select.hh"
 
