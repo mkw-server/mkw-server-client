@@ -1,6 +1,6 @@
 #include "DWCTransport.h"
 
-#include <game/net/MiscPacketHandler.h>
+#include <game/net/RaceHandler.h>
 #include <game/system/RaceManager.h>
 
 #include <sp/net/mkw_server/MKWServer.h>
@@ -45,7 +45,7 @@ BOOL DWCi_GT2UnrecognizedMessageCallback(GT2Socket socket, u32 ip, u16 port, con
 
     if (isReadyAckPacket(message, len)) {
         SP_LOG("Received ready ACK packet from mkw-server!");
-        MiscPacketHandler_setAckReady();
+        RaceHandler_setAckReady();
         return GT2True;
     }
 

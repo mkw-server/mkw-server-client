@@ -14,13 +14,13 @@ extern "C" {
 
 namespace Net {
 
-// MiscPacketHandler runs exclusively in race scene. It handles everything netcode during a race.
-class MiscPacketHandler {
+// RaceHandler runs exclusively in race scene. It handles everything netcode during a race.
+class RaceHandler {
 public:
     // Added. sets m_readyAcked
     void setAckReady();
 
-    static MiscPacketHandler *Instance() {
+    static RaceHandler *Instance() {
         return s_instance;
     }
 
@@ -112,12 +112,12 @@ private:
     // Set to the countdown time, but set after the countdown ends
     u32 m_aidsTimeSinceCountdown[MAX_PLAYER_COUNT];
 
-    static MiscPacketHandler *s_instance;
+    static RaceHandler *s_instance;
 };
-static_assert(sizeof(MiscPacketHandler) == 0x1c8);
+static_assert(sizeof(RaceHandler) == 0x1c8);
 
 } // namespace Net
 
 // Exposed to C b/c UDP packets are handled in a C function (DWCi_GT2UnrecognizedMessageCallback).
 // TODO: Rewrite in C++.
-extern "C" void MiscPacketHandler_setAckReady();
+extern "C" void RaceHandler_setAckReady();
