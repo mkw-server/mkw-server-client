@@ -60,8 +60,8 @@ private:
 
     // Number of times latency has been calculated.
     u32 m_latencySampleCount[12];
-    u32 m_hasNewSelect; // bitfield
-    u32 m_hasNewRH1;    // bitfield
+    u32 m_hasNewSelect;   // bitfield
+    u32 m_hasNewRaceInfo; // bitfield
     u32 _3e8;
     u32 _3ec;
     u32 m_aidsThatVoted; // bitfield
