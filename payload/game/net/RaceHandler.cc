@@ -1,4 +1,4 @@
-#include "MiscPacketHandler.hh"
+#include "RaceHandler.hh"
 
 #include "game/system/RaceManager.hh"
 
@@ -12,18 +12,18 @@ static constexpr u8 READY_RETRY_COOLDOWN = 5;
 
 namespace Net {
 
-void MiscPacketHandler::setAckReady() {
+void RaceHandler::setAckReady() {
     m_readyAcked = true;
 }
 
-void MiscPacketHandler::init() {
+void RaceHandler::init() {
     REPLACED(init)();
 
     m_readyRetryCooldown = 0;
     m_readyAcked = false;
 }
 
-void MiscPacketHandler::trySendReady() {
+void RaceHandler::trySendReady() {
     if (m_readyRetryCooldown > 0) {
         m_readyRetryCooldown--;
         return;
@@ -37,7 +37,7 @@ void MiscPacketHandler::trySendReady() {
     }
 }
 
-void MiscPacketHandler::updateAsRacer() {
+void RaceHandler::updateAsRacer() {
     if (!m_readyAcked) {
         trySendReady();
     }
@@ -47,11 +47,11 @@ void MiscPacketHandler::updateAsRacer() {
 
 } // namespace Net
 
-void MiscPacketHandler_setAckReady() {
+void RaceHandler_setAckReady() {
     // Need to check for nullptr in case if an ack is unexpectedly sent outside of race scene.
-    if (auto *miscPacketHandler = Net::MiscPacketHandler::Instance()) {
+    if (auto *miscPacketHandler = Net::RaceHandler::Instance()) {
         miscPacketHandler->setAckReady();
     } else {
-        SP_LOG("MiscPacketHandler_setAckReady() called outside of RaceScene!");
+        SP_LOG("RaceHandler_setAckReady() called outside of RaceScene!");
     }
 }
