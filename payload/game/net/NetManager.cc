@@ -1,5 +1,6 @@
 #include "NetManager.hh"
 
+#include "game/net/GlobeHandler.hh"
 #include "game/net/records/Room.hh"
 #include "game/ui/SectionManager.hh"
 
@@ -71,8 +72,8 @@ void NetManager::scheduleShutdown() {
 
 void NetManager::cancelMatching() {
     // Reset the two race packet handlers active during the globe scene
-    if (auto *rh1Handler = RH1Handler::Instance()) {
-        rh1Handler->reset();
+    if (auto *globeHandler = GlobeHandler::Instance()) {
+        globeHandler->reset();
     }
     if (auto *roomHandler = RoomHandler::Instance()) {
         roomHandler->reset();
