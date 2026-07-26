@@ -3,7 +3,6 @@
 #include <Common.hh>
 
 #include "game/net/records/Event.hh"
-#include "game/net/records/RH1.hh"
 #include "game/net/records/RaceData.hh"
 #include "game/net/records/Select.hh"
 
@@ -51,9 +50,9 @@ private:
     void exportAsRacer();
 
     // 0x806554a0
-    // Unpacks and processes received RH1 records. Updates m_aidsLoadedIntoRace and time of other
-    // players. Also checks if we're out of sync of other players and disconnects us if so.
-    void processRecvRH1Records();
+    // Unpacks and processes received Race Info records. Updates m_aidsLoadedIntoRace and time of
+    // other players. Also checks if we're out of sync of other players and disconnects us if so.
+    void processRecvRaceInfoRecords();
 
     // 0x80654038
     // Returns true when all players have loaded into the race
@@ -80,7 +79,7 @@ private:
     // Added, was padding. Set when mkw-server has acked our ready packet.
     bool m_readyAcked;
 
-    // Bitfield set by RH1.raceSeed
+    // Bitfield set by RaceInfo.raceSeed
     u32 m_aidsLoadedIntoRace;
 
     // Bitfield set if a room or select record was sent
