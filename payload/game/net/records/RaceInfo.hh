@@ -17,8 +17,14 @@ struct RaceInfoRecord {
     // Random seed. Non-zero for racers and zero for spectators and players in globe scene
     // Its both used for rng and deciding who's racing
     u32 raceSeed;
-    Registry::Team p1Team : 16;
-    Registry::Team p2Team : 16;
+
+    // When battle, true if coin runners, false if balloon battle.
+    // When VS, true if team VS, false if solo VS.
+    bool isCoinRunnersOrTeamVS : 1;
+    u32 _8_1 : 19;
+    // Indexed by playerId to indicate teams. PlayerId slot is 1 if red team. Cleared if solo VS.
+    u32 playerIdTeamMap : 12;
+
     u16 lagFrames;
     Registry::Vehicle p1Vehicle : 8;
     Registry::Vehicle p2Vehicle : 8;
