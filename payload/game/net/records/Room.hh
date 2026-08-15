@@ -34,9 +34,6 @@ public:
 private:
     // Credits: https://wiki.tockdom.com/wiki/Network_Protocol/ROOM
 
-    REPLACE void init(RoomRole role);
-    void REPLACED(init)(RoomRole role);
-
     u8 _00[0x80 - 0x00];
 
     static RoomHandler *s_instance;
