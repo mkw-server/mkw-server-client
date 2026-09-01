@@ -6,3 +6,10 @@ PATCH_REPLACE_START(RaceHandler_updateAsRacer, 0x4c)
     // but this function is complex and therefore risky to functionally match.
     nop
 PATCH_REPLACE_END(RaceHandler_updateAsRacer, 0x4c)
+
+PATCH_REPLACE_START(RaceHandler_processRaceInfo, 0x24c)
+    // nop out the disconnect flag. This no longer works in its vanilla form, causing unnecessary dcs.
+    nop
+PATCH_REPLACE_END(RaceHandler_processRaceInfo, 0x24c)
+
+
