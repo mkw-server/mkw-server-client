@@ -8,13 +8,13 @@ class GameScene : public Scene {
 public:
     GameScene(const char *name);
     ~GameScene() override;
-    // 0x8051b3c8
-    // currently just used to increment a timer frame timer, i am sure one exists in the base game
-    // but it wasnt easy to find. will be removed
-    void REPLACED(calc)();
-    REPLACE void calc() override;
+    void calc() override;
     void draw() override;
-    void enter() override;
+    // 0x8051ab58
+    // Enters the current scene.
+    // Hooked to load in a replay file.
+    REPLACE void enter() override;
+    void REPLACED(enter)();
     void exit() override;
     void reinit() override;
     virtual void vf_28();
@@ -54,6 +54,8 @@ protected:
 
 private:
     u8 _2541[0x254c - 0x2541];
+
+    void openReplayFile() const;
 };
 static_assert(sizeof(GameScene) == 0x254c);
 

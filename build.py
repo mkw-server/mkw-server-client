@@ -43,6 +43,7 @@ parser.add_argument("--debug", action="store_true")
 parser.add_argument("--local_mkw_server", action="store_true")
 parser.add_argument("--test_mkw_server", action="store_true")
 parser.add_argument("--asm", action="store_true", help="Generate assembly files (.s) alongside object files")
+parser.add_argument("--replay", action="store_true")
 args = parser.parse_args(our_argv)
 
 out_buf = io.StringIO()
@@ -413,6 +414,10 @@ if args.local_mkw_server:
 if args.test_mkw_server:
     common_cflags.append("-DTEST_MKW_SERVER")
     common_ccflags.append("-DTEST_MKW_SERVER")
+if args.replay:
+    common_Sflags.append("-DREPLAY")
+    common_cflags.append("-DREPLAY")
+    common_ccflags.append("-DREPLAY")
 
 common_ldflags = [
     '-nostdlib',

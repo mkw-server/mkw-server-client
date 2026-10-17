@@ -30,6 +30,7 @@ struct __attribute__((packed)) Race {
 static_assert(sizeof(Race) == 0x5);
 
 struct __attribute__((packed)) Aid {
+    Aid() = default;
     Aid(const Net::UserRecord *user) : regionLine(user->regionLine), rflWifiData(user->wifiData) {}
 
     Registry::RegionLine regionLine : 8;
