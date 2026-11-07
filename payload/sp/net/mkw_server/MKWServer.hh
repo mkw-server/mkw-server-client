@@ -43,7 +43,7 @@ bool hasMKWServerAddress();
 // player count.
 bool sendRaceFrame(const RaceFrame *raceFrame, u32 size);
 
-bool sendFinishTime(u16 finishTime);
+bool sendTimePacket(u16 magic, u16 time);
 
 void sendReadyPacket();
 

@@ -39,7 +39,7 @@ void RaceHandler::trySendReady() {
 }
 
 void RaceHandler::updateAsRacer() {
-    if (!m_readyAcked) {
+    if (!g_isInReplayMode && !m_readyAcked) {
         trySendReady();
     }
 

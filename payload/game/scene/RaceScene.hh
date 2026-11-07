@@ -12,7 +12,8 @@ public:
     ~RaceScene() override;
     void vf_28() override;
     void vf_2c() override;
-    void calcSubsystems() override;
+    void REPLACED(calcSubsystems)();
+    REPLACE void calcSubsystems() override;
     void REPLACED(destroySubsystems)();
     REPLACE void destroySubsystems() override;
     void vf_38() override;
@@ -28,6 +29,10 @@ public:
 
 private:
     void calcSubsystems(s32 drift);
+
+    void calcRaceManager();
+    void recordFrame();
+    void checkForReplayDesyncs();
 
     u8 _254c[0x256c - 0x254c];
 };

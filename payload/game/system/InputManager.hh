@@ -17,7 +17,6 @@ enum {
     Brake = 1 << 1,
     Item = 1 << 2,
     Drift = 1 << 3,
-    BrakeDrift = 1 << 4, // Added
     LookBackwards = 1 << 5,
 };
 
@@ -43,8 +42,9 @@ enum {
     Left = 1 << 2,
     Right = 1 << 3,
     Accel = 1 << 4,
-    DriftBrake = 1 << 5,
-    Item = 1 << 6,
+    Drift = 1 << 5,
+    Brake = 1 << 6,
+    Item = 1 << 7,
 };
 
 } // namespace RaceInput
@@ -53,16 +53,20 @@ struct RaceInputState {
     virtual ~RaceInputState();
     virtual void dt(s32 type);
 
+    static void SetStickX(RaceInputState &state, u8 stickX);
+    static void SetStickY(RaceInputState &state, u8 stickY);
+    static void SetTrick(RaceInputState &state, u8 trick);
+
     bool isInputValid() const;
 
     // Bits 0  -  6: See RaceInput
-    // Bits 7  - 10: rawStick.x
-    // Bits 11 - 14: rawStick.y
+    // Bits 8  - 11: rawStick.x
+    // Bits 12 - 15: rawStick.y
     u16 inputBitfield() const;
 
     u16 _04 : 10;
     bool lookBackwards : 1;
-    bool brakeDrift : 1;
+    bool _04_11 : 1;
     bool drift : 1;
     bool item : 1;
     bool brake : 1;
@@ -108,9 +112,6 @@ public:
     virtual void vf_40();
     virtual void vf_44();
 
-public:
-    void calc();
-
 private:
     RaceInputState m_currentRaceInputState;
     UIInputState m_currentUIInputState;
@@ -128,6 +129,26 @@ private:
 };
 static_assert(sizeof(PlayerPad) == 0xa8);
 
+class WiiPad : public Pad {
+public:
+    WiiPad();
+    ~WiiPad() override;
+
+private:
+    u8 _920[0x920 - 0x90];
+};
+static_assert(sizeof(WiiPad) == 0x920);
+
+class GCPad : public Pad {
+public:
+    GCPad();
+    ~GCPad() override;
+
+private:
+    u8 _90[0xb0 - 0x90];
+};
+static_assert(sizeof(GCPad) == 0xb0);
+
 class PadProxy {
 public:
     PadProxy();
@@ -140,9 +161,12 @@ public:
     virtual void vf_1c();
     virtual void vf_20();
 
-    const Pad *pad() const;
+    void setInputStateFromReplayFile(u16 time);
+
+    void setDriftType(Registry::DriftType driftType);
+
     const RaceInputState &currentRaceInputState() const;
-    void setPad(Pad *pad, Pad *r5);
+    Pad *pad() const;
 
     Registry::DriftType driftType() const {
         return m_driftType;
@@ -150,7 +174,9 @@ public:
 
 private:
     Pad *m_pad;
-    u8 _08[0x28 - 0x08];
+    Pad *m_uiPad;
+    Pad *m_playerPad;
+    u8 _10[0x28 - 0x10];
     RaceInputState m_currentRaceInputState;
     RaceInputState m_lastRaceInputState;
     u8 _58[0xc0 - 0x58];
@@ -177,16 +203,24 @@ private:
 
 class InputManager {
 public:
+    // for mkw-server replays, not vanilla offline.
+    void setLocalPlayerDriftType(Registry::DriftType driftType);
+
     PlayerPadProxy *playerProxy(u32 i);
 
-    static InputManager *Instance();
+    static InputManager *Instance() {
+        return s_instance;
+    }
 
 private:
     InputManager();
 
     u8 _0000[0x0004 - 0x0000];
     PlayerPadProxy m_playerProxies[4];
-    u8 _03b4[0x415c - 0x03b4];
+    u8 _03b4[0x1720 - 0x03b4];
+    WiiPad m_wiiPads[4];
+    GCPad m_gcPads[4];
+    u8 _3e60[0x415c - 0x3e60];
 
     static InputManager *s_instance;
 };

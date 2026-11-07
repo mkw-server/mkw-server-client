@@ -15,6 +15,7 @@
 
 #define MAX_FRIEND_COUNT 30
 #define MAX_PLAYER_COUNT 12
+#define MAX_RACE_PACKET_SIZE 0x2e0
 
 namespace Net {
 
@@ -56,6 +57,8 @@ public:
         VoteSuspend = 0x2,   // Set when ending a public race or starting a private room
         VoteUnsuspend = 0x3, // Set when private room ends
     };
+
+    void initReplayMMInfo(u8 myAid);
 
     static NetManager *Instance() {
         return s_instance;
@@ -136,9 +139,22 @@ private:
     // Called when joining a friends public room. replaced to implement mkw-server match making
     REPLACE void connectToGameServerFromGroupId();
 
+public:
     // 0x80659a84
+    // Called when receiving a packet from another client.
+    // Replaced to copy the received packet to m_pendingPackets if received mid-race.
     REPLACE void processRacePacket(u8 aid, u8 *header, u32 size);
 
+    // Added
+    // Passes in packets from m_pendingPackets to applyRacePacket().
+    void applyPendingPackets();
+
+    // Added
+    // This is functionally the same as the base game's processRacePacket() but has some
+    // additional logic for replays.
+    void applyRacePacket(u8 aid, u8 *packet, u32 size);
+
+private:
     // 0x80659fa4
     FriendJoinableStatus getFriendJoinableStatus(u32 friendId);
 
@@ -175,9 +191,9 @@ private:
     OSTime m_timeBetweenRecvPackets[MAX_PLAYER_COUNT];    // time between recieved
                                                           // packets per aid / 0x300
     u8 m_aidLastSentTo;                                   // Aid of last player we sent to / 0x360
-    u8 m_recvRacePacketBuffer[MAX_PLAYER_COUNT][0x2e0];   // 0x361
-    u8 _25e1[0x25e4 - 0x25e1];                            // padding
-    StatusData m_myStatusData;                            // 0x25e4
+    u8 m_recvRacePacketBuffer[MAX_PLAYER_COUNT][MAX_RACE_PACKET_SIZE]; // 0x361
+    u8 _25e1[0x25e4 - 0x25e1];                                         // padding
+    StatusData m_myStatusData;                                         // 0x25e4
     FriendInfo m_friends[MAX_FRIEND_COUNT];
     bool m_friendRosterChanged;      // set when a friend adds back 0x2753
     bool m_shutdownScheduled;        // set when logging off // 0x2755

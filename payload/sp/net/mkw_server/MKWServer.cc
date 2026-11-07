@@ -7,7 +7,7 @@ extern "C" {
 
 #include "sp/net/WiiLink.hh"
 #include "sp/net/mkw_server/RoomManager.hh"
-#include "sp/net/mkw_server/race_verification/FinishTime.hh"
+#include "sp/net/mkw_server/race_verification/TimePacket.hh"
 
 #include <string.h>
 
@@ -72,18 +72,16 @@ bool sendRaceFrame(const RaceFrame *raceFrame, u32 size) {
     return result;
 }
 
-bool sendFinishTime(u16 finishTime) {
+bool sendTimePacket(u16 magic, u16 time) {
     if (!hasMKWServerAddress()) {
-        SP_LOG("Can't send FinishTime: Don't have mkw-server address!");
+        SP_LOG("Can't send time packet 0x%x: Don't have mkw-server address!", magic);
         return false;
     }
 
-    auto finishTimePacket = FinishTime(finishTime);
-
-    bool result = SOSendTo(s_dwcMatch->qrec->hbsock, &finishTimePacket, sizeof(FinishTime), 0,
-            &s_mkwServerAddr);
+    TimePacket packet(magic, time);
+    bool result = SOSendTo(s_dwcMatch->qrec->hbsock, &packet, sizeof(packet), 0, &s_mkwServerAddr);
     if (!result) {
-        SP_LOG("Failed to send FinishTime to mkw-server! SOSendTo failed!");
+        SP_LOG("Failed to send time packet 0x%x to mkw-server! SOSendTo failed!", magic);
     }
     return result;
 }

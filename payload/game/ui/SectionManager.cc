@@ -26,4 +26,17 @@ void SectionManager::createSection() {
     m_currentSection->init(nextId);
 }
 
+void SectionManager::init() {
+    REPLACED(init)();
+
+    // Boots the game into the online VS race section for replay builds.
+    // TODO: Multiplayer support.
+    // TODO: Set section based off the gamemode in the replay file.
+    if (g_isInReplayMode) {
+        m_bootSectionId = SectionId::WifiSingleVSGameplay;
+        // The game runs OOM when m_nextSectionId isn't set. Not sure why.
+        m_nextSectionId = SectionId::WifiSingleVSGameplay;
+    }
+}
+
 } // namespace UI

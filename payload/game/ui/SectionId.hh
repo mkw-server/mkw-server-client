@@ -15,6 +15,8 @@ enum class SectionId {
     WifiMultiDC = 0x5c,
     WifiMultiFriend = 0x5d,
 
+    WifiSingleVSGameplay = 0x68,
+
     Max = 0x95,
 };
 

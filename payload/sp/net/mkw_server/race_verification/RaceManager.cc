@@ -3,112 +3,62 @@
 #include "sp/net/mkw_server/MKWServer.hh"
 #include "sp/net/mkw_server/race_verification/Config.hh"
 #include "sp/net/mkw_server/race_verification/MissingFrames.hh"
-
-#include <game/kart/KartObjectManager.hh>
-#include <game/kart/VehiclePhysics.hh>
-#include <game/net/NetManager.hh>
-#include <game/net/records/User.hh>
-#include <game/system/RaceConfig.hh>
-#include <game/system/RaceManager.hh>
-
-#include <ranges>
+#include "sp/net/mkw_server/race_verification/TimePacket.hh"
 
 extern "C" {
 #include <revolution.h>
 }
 
+#include <ranges>
+#include <string.h>
+
 namespace MKWServer {
 
 RaceManager *RaceManager::s_instance = nullptr;
 
-void RaceManager::update() {
-    if (!isActive()) {
-        return;
-    }
+bool RaceManager::recordFrame(u16 time, const RaceFramePlayer *players, u8 playerCount) {
+    OSLockMutex(&m_framesMutex);
 
-    // save m_time in case it changed.
-    u16 currTime = m_time;
-    if (updateTime()) {
-        // it changed, meaning the last frame is finalized and can be sent.
-        if (auto raceFrame = getOrCreateFrame(currTime)) {
-            if (!MKWServer::sendRaceFrame(raceFrame, raceFrameSize())) {
-                SP_LOG("Failed to send frame %d", currTime);
-            }
-        } else {
-            SP_LOG("failed get frame to send (%d)", currTime);
-        }
-
-        // Create a new race frame for the current frame.
-        if (!getOrCreateFrame(m_time)) {
-            SP_LOG("Creating frame %d failed", m_time);
-        }
-    }
     resendFrames();
-}
 
-bool RaceManager::removeRaceFrame(u16 time) {
-    s32 idx = findFrame(time);
-
-    if (idx < 0) {
+    if (findFrame(time) >= 0 || !m_raceFrames.push_back(RaceFrame(time))) {
+        OSUnlockMutex(&m_framesMutex);
         return false;
     }
 
-    m_raceFrames.remove(idx);
+    auto *frame = m_raceFrames.back();
+    memcpy(frame->recvPacketTimestamps, m_sentTimes, sizeof(m_sentTimes));
+    memset(m_sentTimes, 0, sizeof(m_sentTimes));
+    for (u8 i = 0; i < playerCount; i++) {
+        frame->players[i] = players[i];
+    }
+
+    if (!MKWServer::sendRaceFrame(frame, raceFrameSize())) {
+        SP_LOG("Failed to send frame %d", time);
+    }
+
+    OSUnlockMutex(&m_framesMutex);
     return true;
 }
 
-void RaceManager::markReceived(u8 aid, u16 time) {
-    if (!isActive()) {
+void RaceManager::markApplied(u8 aid, u16 time) {
+    if (aid >= 12) {
         return;
     }
 
-    // Call update() to handle the unlikely event that m_frame changed. This function is called
-    // upon receiving a packet and runs on a different thread than System::RaceManager::upate(),
-    // which calls MKWServer::RaceManager::update(). So this prevents m_frame from being stale when
-    // marking recv timestamps.
-    update();
-    if (auto raceFrame = getOrCreateFrame(m_time)) {
-        raceFrame->recvPacketTimestamps[aid] = time;
-    }
+    m_sentTimes[aid] = time;
 }
 
-void RaceManager::updateRaceFinished() {
-    if (m_finishTimeAcked) {
-        return;
-    }
+bool RaceManager::removeRaceFrame(u16 time) {
+    OSLockMutex(&m_framesMutex);
+    s32 idx = findFrame(time);
 
-    if (m_raceFinishTime == 0) {
-        auto *raceManager = System::RaceManager::Instance();
-        if (!raceManager) {
-            SP_LOG("raceManager is nullptr in updateRaceState()");
-            return;
-        }
-        // A race frame isn't created on the frame prior to the finished frame. Its unclear why,
-        // but this subtraction is needed to not miss a frame.
-        // TODO: Figure out the off by one.
-        m_raceFinishTime = raceManager->countdownTimer() - 1;
-        SP_LOG("finishTime updated to %d", m_raceFinishTime);
+    bool removed = idx >= 0;
+    if (removed) {
+        m_raceFrames.remove(idx);
     }
-
-    u64 now = OSGetTick();
-    if (m_finishTimeSent &&
-            OSTicksToMilliseconds(now - m_finishTimeLastSendTick) < FinishTimeResendMs) {
-        return;
-    }
-
-    if (m_finishTimeSent) {
-        SP_LOG("no finishTime ack yet, resending %d", m_raceFinishTime);
-    }
-
-    m_finishTimeLastSendTick = now;
-    m_finishTimeSent = MKWServer::sendFinishTime(m_raceFinishTime);
-}
-
-void RaceManager::onFinishTimeAck() {
-    if (!m_finishTimeAcked) {
-        SP_LOG("finishTime acked");
-    }
-    m_finishTimeAcked = true;
+    OSUnlockMutex(&m_framesMutex);
+    return removed;
 }
 
 void RaceManager::handleMissingFrames(const u8 *message, s32 len) {
@@ -119,6 +69,7 @@ void RaceManager::handleMissingFrames(const u8 *message, s32 len) {
 
     u16 missingFrameCount = MissingFramesRequest::Count(message);
 
+    OSLockMutex(&m_framesMutex);
     for (u32 i = 0; i < missingFrameCount; i++) {
         u16 time = MissingFramesRequest::TimeAt(message, i);
 
@@ -133,6 +84,7 @@ void RaceManager::handleMissingFrames(const u8 *message, s32 len) {
             continue;
         }
     }
+    OSUnlockMutex(&m_framesMutex);
 }
 
 void RaceManager::onMissingFramesAck() {
@@ -160,7 +112,7 @@ bool RaceManager::makeAndSendConfig() {
         return false;
     }
 
-    MKWServer::Aid aid(userRecord);
+    MKWServer::Aid aid(userRecord, raceScenario.seed2);
     MKWServer::ConfigPacket configPacket(race, aid);
 
     for (auto [i, playerId] : std::views::enumerate(m_playerIds)) {
@@ -174,18 +126,34 @@ bool RaceManager::makeAndSendConfig() {
     return MKWServer::sendConfig(configPacket, ConfigPacket::CalcPacketSize(m_localPlayerCount));
 }
 
-void RaceManager::CreateInstance() {
+void RaceManager::updateRaceStarted(u16 introTimer) {
+    sendTime(m_introWaitTime, introTimer, IntroWaitTimeMagic);
+}
+
+void RaceManager::updateRaceFinished(u16 finishTime) {
+    sendTime(m_finishTime, finishTime, FinishTimeMagic);
+}
+
+void RaceManager::onIntroWaitTimeAck() {
+    m_introWaitTime.acked = true;
+}
+
+void RaceManager::onFinishTimeAck() {
+    m_finishTime.acked = true;
+}
+
+void RaceManager::CreateInstance(u8 myAid, u8 localPlayerCount, s8 *localPlayersPlayerIds) {
     if (s_instance) {
         return;
     }
 
     s_instance = new RaceManager;
+    OSInitMutex(&s_instance->m_framesMutex);
 
-    auto *netManager = Net::NetManager::Instance();
-    s_instance->m_myAid = netManager->myAid();
-    s_instance->m_localPlayerCount = netManager->localPlayerCount();
-    for (auto [i, val] : std::views::enumerate(s_instance->m_playerIds)) {
-        s_instance->m_playerIds[i] = netManager->localPlayersPlayerId(i);
+    s_instance->m_myAid = myAid;
+    s_instance->m_localPlayerCount = localPlayerCount;
+    for (u8 i = 0; i < localPlayerCount; i++) {
+        s_instance->m_playerIds[i] = localPlayersPlayerIds[i];
     }
 }
 
@@ -198,53 +166,8 @@ void RaceManager::DestroyInstance() {
     s_instance = nullptr;
 }
 
-RaceFrame *RaceManager::getOrCreateFrame(u16 time) {
-    s32 idx = findFrame(time);
-    if (idx < 0) {
-        if (!m_raceFrames.push_back(makeFrame(time))) {
-            return nullptr;
-        }
-        idx = m_raceFrames.count() - 1;
-    }
-
-    return m_raceFrames[idx];
-}
-
-bool RaceManager::updateTime() {
-    auto *raceManager = System::RaceManager::Instance();
-    if (!raceManager) {
-        return false;
-    }
-
-    if (!raceManager->isRaceOngoing()) {
-        return false;
-    }
-
-    auto *raceConfig = System::RaceConfig::Instance();
-    if (!raceConfig || !raceConfig->raceScenario().isOnline()) {
-        return false;
-    }
-
-    u16 raceManagerTime = raceManager->countdownTimer();
-    if (m_time == raceManagerTime) {
-        return false;
-    }
-
-    m_time = raceManagerTime;
-    return true;
-}
-
-bool RaceManager::isActive() {
-    auto *raceConfig = System::RaceConfig::Instance();
-    auto *raceManager = System::RaceManager::Instance();
-    if (!raceConfig || !raceManager) {
-        return false;
-    }
-
-    return raceConfig->raceScenario().isOnline() && raceManager->isRaceOngoing();
-}
-
 void RaceManager::resendFrames() {
+    OSLockMutex(&m_framesMutex);
     for (u32 i = 0; i < m_raceFrames.count(); i++) {
         auto raceFrame = m_raceFrames[i];
 
@@ -257,6 +180,7 @@ void RaceManager::resendFrames() {
             }
         }
     }
+    OSUnlockMutex(&m_framesMutex);
 }
 
 s32 RaceManager::findFrame(u16 time) {
@@ -269,27 +193,46 @@ s32 RaceManager::findFrame(u16 time) {
     return -1;
 }
 
-RaceFrame RaceManager::makeFrame(u16 time) {
-    auto *raceManager = System::RaceManager::Instance();
-    auto *kartObjectManager = Kart::KartObjectManager::Instance();
-
-    RaceFrame frame(time);
-    for (auto [i, playerId] : std::views::enumerate(m_playerIds)) {
-        if (playerId == -1) {
-            continue;
-        }
-        u16 inputs =
-                raceManager->player(playerId)->padProxy()->currentRaceInputState().inputBitfield();
-        Vec3 pos = *kartObjectManager->object(playerId)->getVehiclePhysics()->pos();
-        RaceFramePlayer player(inputs, pos);
-        frame.players[i] = player;
+RaceFrame *RaceManager::getFrame(u16 time) {
+    s32 idx = findFrame(time);
+    if (idx < 0) {
+        return nullptr;
     }
+    return m_raceFrames[idx];
+}
+
+RaceFrame RaceManager::makeFrame(u16 time) {
+    RaceFrame frame(time);
     return frame;
 }
 
 u32 RaceManager::raceFrameSize() const {
     u32 playerRecordSize = m_localPlayerCount * sizeof(RaceFramePlayer);
     return sizeof(RaceFrame) - (2 * sizeof(RaceFramePlayer)) + playerRecordSize;
+}
+
+void RaceManager::sendTime(TimeSendInfo &state, u16 time, u16 magic) {
+    if (state.acked) {
+        return;
+    }
+
+    if (!state.hasTime) {
+        state.time = time;
+        state.hasTime = true;
+        SP_LOG("magic 0x%x set to %d", magic, state.time);
+    }
+
+    u64 now = OSGetTick();
+    if (state.sent && OSTicksToMilliseconds(now - state.lastSendTick) < TimeResendMs) {
+        return;
+    }
+
+    if (state.sent) {
+        SP_LOG("no 0x%x ack yet, resending %d", magic, state.time);
+    }
+
+    state.lastSendTick = now;
+    state.sent = MKWServer::sendTimePacket(magic, state.time);
 }
 
 } // namespace MKWServer

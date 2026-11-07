@@ -20,23 +20,26 @@ static constexpr u16 ConfigMagic = 0x4346;
 struct __attribute__((packed)) Race {
     Race(const System::RaceConfig::Scenario &scenario)
         : course(scenario.course), engineClass(scenario.engineClass), gameMode(scenario.gameMode),
-          battleType(scenario.battleType), modeFlags(scenario.modeFlags) {}
+          battleType(scenario.battleType), modeFlags(scenario.modeFlags), seed1(scenario.seed1) {}
     Registry::Course course : 8;
     Registry::EngineClass engineClass : 8;
     Registry::GameMode gameMode : 8;
     Registry::BattleType battleType : 8;
     Registry::ModeFlags modeFlags : 8;
+    u32 seed1;
 };
-static_assert(sizeof(Race) == 0x5);
+static_assert(sizeof(Race) == 0x9);
 
 struct __attribute__((packed)) Aid {
     Aid() = default;
-    Aid(const Net::UserRecord *user) : regionLine(user->regionLine), rflWifiData(user->wifiData) {}
+    Aid(const Net::UserRecord *user, u32 seed2)
+        : regionLine(user->regionLine), rflWifiData(user->wifiData), seed2(seed2) {}
 
     Registry::RegionLine regionLine : 8;
     RFLWifiData rflWifiData;
+    u32 seed2;
 };
-static_assert(sizeof(Aid) == 0xa1);
+static_assert(sizeof(Aid) == 0xa5);
 
 struct __attribute__((packed)) Player {
     Player() = default;
@@ -72,6 +75,6 @@ struct __attribute__((packed)) ConfigPacket {
     Aid aid;
     Player players[2];
 };
-static_assert(sizeof(ConfigPacket) == 0xc0);
+static_assert(sizeof(ConfigPacket) == 0xc8);
 
 } // namespace MKWServer
