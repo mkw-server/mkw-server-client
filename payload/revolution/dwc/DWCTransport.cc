@@ -4,8 +4,8 @@
 #include <game/system/RaceManager.hh>
 
 #include <sp/net/mkw_server/MKWServer.hh>
-#include <sp/net/mkw_server/race_verification/FinishTime.hh>
 #include <sp/net/mkw_server/race_verification/MissingFrames.hh>
+#include <sp/net/mkw_server/race_verification/TimePacket.hh>
 
 #include <string.h>
 
@@ -75,7 +75,14 @@ BOOL DWCi_GT2UnrecognizedMessageCallback(GT2Socket socket, u32 ip, u16 port, con
         return TRUE;
     }
 
-    if (MKWServer::FinishTime::IsFinishTimeAck(message, len)) {
+    if (MKWServer::TimePacket::IsAck(message, len, MKWServer::IntroWaitTimeMagic)) {
+        if (auto *raceManager = MKWServer::RaceManager::Instance()) {
+            raceManager->onIntroWaitTimeAck();
+        }
+        return TRUE;
+    }
+
+    if (MKWServer::TimePacket::IsAck(message, len, MKWServer::FinishTimeMagic)) {
         if (auto *raceManager = MKWServer::RaceManager::Instance()) {
             raceManager->onFinishTimeAck();
         }

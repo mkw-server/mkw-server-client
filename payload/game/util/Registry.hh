@@ -247,4 +247,12 @@ enum class RegionLine {
     Korea = 5,
 };
 
+enum class PlayerType {
+    Local = 0,
+    CPU = 1,
+    Ghost = 3,
+    Online = 4,
+    None = 5,
+};
+
 } // namespace Registry

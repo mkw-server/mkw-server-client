@@ -1,10 +1,12 @@
 #include "RaceManager.hh"
 
 #include "game/item/ItemDirector.hh"
+#include "game/net/NetManager.hh"
 #include "game/system/RaceConfig.hh"
 
 #include <sp/SaveStateManager.hh>
 #include <sp/net/mkw_server/race_verification/RaceManager.hh>
+#include <sp/net/mkw_server/race_verification/ReplayFile.hh>
 
 extern "C" {
 #include <revolution.h>
@@ -60,25 +62,64 @@ void RaceManager::Player::calc() {
     }
 }
 
-bool RaceManager::isRaceOngoing() const {
-    switch (m_state) {
-    case RaceState::Countdown:
-    case RaceState::Racing:
-        return true;
-    default:
-        return false;
-    }
-}
-
 void RaceManager::update() {
     REPLACED(update)();
 
-    if (auto *raceManager = MKWServer::RaceManager::Instance()) {
-        raceManager->update();
+    if (g_isInReplayMode) {
+        updateReplay();
+        return;
+    }
 
-        if (m_state == RaceState::Finished) {
-            raceManager->updateRaceFinished();
+    Net::NetManager::Instance()->applyPendingPackets();
+}
+
+void RaceManager::updateReplay() {
+    auto *replay = MKWServer::ReplayFile::Instance();
+    if (!replay) {
+        SP_LOG("!replay (shouldn't happen)");
+        return;
+    }
+
+    auto *netManager = Net::NetManager::Instance();
+    u8 myAid = netManager->myAid();
+
+    u16 introWaitTime = replay->aidRecord(myAid).introWaitTime;
+    // While waiting for the race to start, which takes a variable amount of time, the
+    // character bobs up and down. Funnily enough, this changes the y position by a tiny amount and
+    // causes the replay to desync. Replays need to wait the same amount of time as the actual race.
+    // TODO: Look into if the intro wait time can be modulo-ed and still sync to save time waiting.
+    if (m_introTimer == introWaitTime) {
+        m_canCountdownStart = true;
+    }
+
+    auto *playerPad = System::InputManager::Instance()->playerProxy(g_localPlayerIdToReplay);
+    playerPad->setInputStateFromReplayFile(m_countdownTimer);
+
+    if (!isRaceOngoing()) {
+        return;
+    }
+
+    for (u8 aid = 0; aid < 12; aid++) {
+        if (aid == myAid) {
+            continue;
         }
+
+        u16 sentTime = replay->recvSentTime(myAid, aid, m_countdownTimer);
+        if (sentTime == 0) {
+            continue;
+        }
+
+        u32 size;
+        const u8 *packet = replay->racePacket(aid, sentTime, size);
+        if (!packet || size == 0 || size > MAX_RACE_PACKET_SIZE) {
+            SP_LOG("frame %d: aid %d sent time %d has no usable race packet", m_countdownTimer, aid,
+                    sentTime);
+            continue;
+        }
+
+        u8 buffer[MAX_RACE_PACKET_SIZE];
+        memcpy(buffer, packet, size);
+        netManager->applyRacePacket(aid, buffer, size);
     }
 }
 

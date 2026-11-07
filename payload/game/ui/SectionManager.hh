@@ -21,6 +21,12 @@ public:
     void REPLACED(createSection)();
     REPLACE void createSection();
 
+    // 0x80634e44
+    // Called upon boot.
+    // Hooked to change the section to boot for replay builds.
+    REPLACE void init();
+    void REPLACED(init)();
+
     u8 getLocalPlayerCount() const;
 
     const SectionParams *sectionParams() const {
@@ -33,7 +39,8 @@ public:
 
 private:
     Section *m_currentSection;
-    u8 _04[0x0c - 0x04];
+    SectionId m_bootSectionId;
+    u8 _08[0x0c - 0x08];
     SectionId m_nextSectionId;
     SectionId m_lastSectionId;
     u32 m_currentAnimDir;

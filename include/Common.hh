@@ -11,6 +11,13 @@ extern "C" {
 #include <type_traits>
 #include <utility>
 
+// Global flag to wrap around the REPLAY preprocessor definition.
+#ifdef REPLAY
+inline constexpr bool g_isInReplayMode = true;
+#else
+inline constexpr bool g_isInReplayMode = false;
+#endif
+
 // This works on Clang, too. Not limited to function arguments.
 #define ALIGNED_STRING(s) \
     []() { \

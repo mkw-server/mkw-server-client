@@ -46,19 +46,41 @@ public:
         return m_countdownTimer;
     }
 
+    bool hasCountdownStarted() const {
+        return m_canCountdownStart;
+    }
+
     void startCountdown() {
         m_canCountdownStart = true;
     }
 
-    bool isRaceOngoing() const;
+    bool isRaceOngoing() const {
+        switch (m_state) {
+        case RaceState::Countdown:
+        case RaceState::Racing:
+            return true;
+        default:
+            return false;
+        }
+    }
+
+    bool isRaceFinished() const {
+        return m_state == RaceState::Finished;
+    }
 
     static RaceManager *Instance() {
         return s_instance;
     }
 
 private:
+    // 0x805331b4
+    // Hooked to update countdown begin and set inputs for replays.
     REPLACE void update();
     void REPLACED(update)();
+
+    // Passes the packets received on the current frame from the replay file to
+    // NetManager::processRacePacket() to be imported.
+    void updateReplay();
 
     u8 _00[0x0c - 0x00];
     Player **m_players;

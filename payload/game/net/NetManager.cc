@@ -5,12 +5,59 @@
 #include "game/ui/SectionManager.hh"
 
 #include <sp/net/mkw_server/MKWServer.hh>
+#include <sp/net/mkw_server/race_verification/ReplayFile.hh>
 
 extern "C" {
 #include <revolution.h>
 }
 
 namespace Net {
+
+// For replays to work, we must know the exact time a packet was received. The current time
+// lives in System::RaceManager::m_countdownTimer. This is updated on a different thread than
+// the receive thread, so reading this timer is racy. To work around this, we receive packets
+// around mutexes and actually process them on the same thread that updates the timer.
+struct PendingRacePackets {
+    bool recv;
+    u32 size;
+
+    // Ideally, we'd use m_recvRacePacketBuffer instead of creating a whole new buffer, but DWC
+    // uses it which could lead to problems.
+    u8 data[MAX_RACE_PACKET_SIZE];
+};
+
+PendingRacePackets s_pendingPackets[MAX_PLAYER_COUNT];
+OSMutex s_pendingPacketsMutex;
+
+void NetManager::initReplayMMInfo(u8 myAid) {
+    auto *replayFile = MKWServer::ReplayFile::Instance();
+    if (!replayFile) {
+        SP_LOG("replayFile is nullptr!");
+        return;
+    }
+
+    auto &header = replayFile->header();
+    for (u8 i = 0; i < std::size(m_matchMakingInfos); i++) {
+        m_matchMakingInfos[i].numAids = header.aidCount;
+        m_matchMakingInfos[i].numPlayers = header.playerCount;
+        m_matchMakingInfos[i].myAid = myAid;
+
+        for (const auto &a : replayFile->aids()) {
+            if (a.aid == 0xff) {
+                continue;
+            }
+            m_matchMakingInfos[i].availableAids.set(a.aid);
+            m_matchMakingInfos[i].localPlayerCounts[a.aid].playersAtConsole = a.localPlayerCount;
+            if (a.aid == myAid) {
+                m_matchMakingInfos[i].myLocalPlayerCount = a.localPlayerCount;
+            }
+        }
+    }
+
+    for (u8 playerId = 0; playerId < MAX_PLAYER_COUNT; playerId++) {
+        m_playerIdToAidMapping[playerId] = replayFile->playerRecord(playerId).aid;
+    }
+}
 
 const MatchMakingInfo &NetManager::currentMMInfo() const {
     return m_matchMakingInfos[m_currMMInfo];
@@ -70,6 +117,8 @@ void NetManager::init(u8 localPlayerCount) {
 
     // initialize the unique packets buffer
     m_outgoingUniquePackets.reset();
+
+    OSInitMutex(&s_pendingPacketsMutex);
 }
 
 void NetManager::scheduleShutdown() {
@@ -285,6 +334,38 @@ void NetManager::connectToGameServerFromGroupId() {
 }
 
 void NetManager::processRacePacket(u8 aid, u8 *packet, u32 size) {
+    if (!packet || size > MAX_RACE_PACKET_SIZE) {
+        SP_LOG("Can't handle race packet from aid %d (size %d)", aid, size);
+        return;
+    }
+
+    // Add the packet to the pending buffer during races. Just process packets normally otherwise.
+    if (System::RaceManager::Instance()) {
+        OSLockMutex(&s_pendingPacketsMutex);
+        s_pendingPackets[aid].size = size;
+        s_pendingPackets[aid].recv = true;
+        memcpy(s_pendingPackets[aid].data, packet, size);
+        OSUnlockMutex(&s_pendingPacketsMutex);
+    } else {
+        applyRacePacket(aid, packet, size);
+    }
+}
+
+void NetManager::applyPendingPackets() {
+    // Acquire to prevent s_pendingPackets from being changed mid call.
+    OSLockMutex(&s_pendingPacketsMutex);
+    for (u8 aid = 0; aid < MAX_PLAYER_COUNT; aid++) {
+        auto &packet = s_pendingPackets[aid];
+        if (!packet.recv) {
+            continue;
+        }
+        applyRacePacket(aid, packet.data, packet.size);
+        packet.recv = false;
+    }
+    OSUnlockMutex(&s_pendingPacketsMutex);
+}
+
+void NetManager::applyRacePacket(u8 aid, u8 *packet, u32 size) {
     if (!packet || size < sizeof(Header)) {
         SP_LOG("Race packet too small (%d)", size);
         return;
@@ -325,20 +406,18 @@ void NetManager::processRacePacket(u8 aid, u8 *packet, u32 size) {
         m_lastRecvIdx[aid][i] ^= 1;
     }
 
-    // Try to mark the time we received this packet.
-    auto *raceManager = MKWServer::RaceManager::Instance();
-    if (!raceManager) {
-        return;
-    }
-
     auto *aidRaceInfo = lastRecvRaceBuffer(aid, RecordType::RaceInfo)->raceInfo()->record();
     if (!aidRaceInfo) {
         return;
     }
 
     // If the aid has started the countdown, mark when we received their packet.
-    if (aidRaceInfo->startedCountdown) {
-        raceManager->markReceived(aid, aidRaceInfo->timeSinceCountdown);
+    auto *raceManager = MKWServer::RaceManager::Instance();
+    auto *sysRaceManager = System::RaceManager::Instance();
+
+    if (raceManager && sysRaceManager && sysRaceManager->isRaceOngoing() &&
+            aidRaceInfo->startedCountdown) {
+        raceManager->markApplied(aid, aidRaceInfo->timeSinceCountdown);
     }
 }
 

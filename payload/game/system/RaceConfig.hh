@@ -2,7 +2,14 @@
 
 #include <Common.hh>
 
+#include "game/system/Mii.hh"
 #include "game/util/Registry.hh"
+
+#include <array>
+
+// Place-holder.
+inline constexpr u8 g_playerIdToReplay = 0;
+inline constexpr u8 g_localPlayerIdToReplay = 0;
 
 namespace System {
 
@@ -19,13 +26,19 @@ public:
         u8 _00[0x08 - 0x00];
         Registry::Vehicle vehicle;
         Registry::Character character;
-        u8 _10[0xcc - 0x10];
+        Registry::PlayerType type;
+        Mii mii; // TODO: Read from replay file.
         Registry::Team team;
-        u8 _d0[0xd8 - 0xd0];
+        Registry::Controller controller;
+        u8 _d4[0xd8 - 0xd4];
         u16 points;
-        u8 _da[0xe1 - 0xda];
+        u8 _da[0xde - 0xda];
+        u16 rankIconId;
+        u8 _e0[0xe1 - 0xe0];
         u8 startingSpot;
-        u8 _e2[0xf0 - 0xe2];
+        u8 _e2[0xe4 - 0xe2];
+        u32 rating;
+        u8 _e8[0xf0 - 0xe8];
     };
     static_assert(sizeof(Player) == 0xf0);
 
@@ -33,8 +46,12 @@ public:
         bool isOnline() const;
         bool isOnlineVS() const;
         bool isOnlineBattle() const;
-        u8 _000[0x008 - 0x000];
-        Player players[12];
+        u8 _000[0x004 - 0x000];
+        u8 playerCount;
+        u8 hudCount;
+        u8 localPlayerCount;
+        u8 _007[0x008 - 0x007];
+        std::array<Player, 12> players;
         Registry::Course course;
         Registry::EngineClass engineClass;
         Registry::GameMode gameMode;
@@ -42,11 +59,20 @@ public:
         Registry::BattleType battleType;
         u8 _b5c[0xb73 - 0xb5c];
         Registry::ModeFlags modeFlags : 8;
-        u8 _b74[0xbf0 - 0xb74];
+        u32 seed1;
+        u32 seed2;
+        u8 _b7c[0xbf0 - 0xb7c];
     };
     static_assert(sizeof(Scenario) == 0xbf0);
 
     Scenario &raceScenario();
+
+    // 0x805302c4
+    REPLACE void initRace();
+    void REPLACED(initRace)();
+
+    // Sets up mkw-server replays from the replay file.
+    void initReplay();
 
     static RaceConfig *Instance();
 
@@ -55,7 +81,8 @@ private:
 
 public:
     Scenario m_raceScenario;
-    u8 _0c10[0x73f0 - 0x0c10];
+    Scenario m_menuScenario;
+    u8 _1800[0x73f0 - 0x1800];
 
     static RaceConfig *s_instance;
 };

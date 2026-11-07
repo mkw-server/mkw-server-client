@@ -2,6 +2,10 @@
 
 #include <sp/net/mkw_server/race_verification/ReplayFile.hh>
 
+// Included for REPLAY_FILE_PATH. After it creates a replay file, mkw-server updates LatestReplay.hh
+// to the newest replay file name to speed up testing.
+#include <LatestReplay.hh>
+
 extern "C" {
 #include <revolution.h>
 }
@@ -9,25 +13,28 @@ extern "C" {
 namespace System {
 
 void GameScene::enter() {
-#ifdef REPLAY
-    openReplayFile();
-#endif
+    if (g_isInReplayMode) {
+        openReplayFile();
+    }
+
     REPLACED(enter)();
 }
 
 void GameScene::openReplayFile() const {
-    MKWServer::ReplayFileManager::CreateInstance();
+    MKWServer::ReplayFile::CreateInstance();
 
-    auto *replayManager = MKWServer::ReplayFileManager::Instance();
-    if (!replayManager) {
-        SP_LOG("MKWServer::ReplayFileManager::Instance() is nullptr!");
+    auto *replay = MKWServer::ReplayFile::Instance();
+    if (!replay) {
+        SP_LOG("MKWServer::ReplayFile::Instance() is nullptr!");
         return;
     }
 
     // TODO: Make configurable.
-    bool openResult = replayManager->open(L"/mkw-sp/replays/2026-10-12_18-41-39.rply");
+
+    char err[256];
+    bool openResult = replay->open(REPLAY_FILE_PATH, err);
     if (!openResult) {
-        SP_LOG("!openResult");
+        panic(err);
         return;
     }
 }
